@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Google Fonts: Outfit -->
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --accent-purple: #7000ff;
+        --accent-cyan: #00f2ff;
+        --accent-green: #00ff95;
+        --accent-yellow: #ffcc00;
+        --accent-red: #ff0055;
+        --bg-dark: #0a0a0f;
+        --card-bg: rgba(255, 255, 255, 0.03);
+    }
+
+    .subject-page {
+        min-height: 100vh;
+        background: var(--bg-dark);
+        font-family: 'Outfit', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 20px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .subject-page::before {
+        content: '';
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        background-image: 
+            linear-gradient(rgba(112, 0, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(112, 0, 255, 0.05) 1px, transparent 1px);
+        background-size: 50px 50px;
+        transform: perspective(500px) rotateX(60deg);
+        top: -50%;
+        z-index: 0;
+    }
+
+    .header-section {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        margin-bottom: 80px;
+    }
+
+    .info-title {
+        font-weight: 800;
+        font-size: clamp(2.5rem, 8vw, 5rem);
+        margin: 0;
+        background: linear-gradient(to bottom, #fff, var(--accent-purple));
+        -webkit-text-fill-color: transparent;
+        text-transform: uppercase;
+        letter-spacing: 12px;
+        filter: drop-shadow(0 0 15px rgba(112, 0, 255, 0.4));
+    }
+
+    .sub-text {
+        color: #64748b;
+        font-size: 1.1rem;
+        letter-spacing: 4px;
+        margin-top: 15px;
+        font-weight: 300;
+        text-transform: uppercase;
+    }
+
+    .cards-wrapper {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 30px;
+        width: 100%;
+        max-width: 1100px;
+    }
+
+    .level-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 35px;
+        padding: 50px 40px;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .level-card:hover {
+        transform: translateY(-12px);
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(112, 0, 255, 0.3);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .icon-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 25px;
+        transition: 0.4s;
+    }
+
+    .level-card:hover .icon-wrapper {
+        transform: scale(1.15);
+        filter: drop-shadow(0 0 15px currentColor);
+    }
+
+    .level-card h3 {
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .level-card p {
+        color: #94a3b8;
+        line-height: 1.6;
+        font-size: 1rem;
+        font-weight: 300;
+        height: 50px;
+        margin-bottom: 35px;
+    }
+
+    .btn-action {
+        display: block;
+        padding: 16px;
+        border-radius: 18px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-decoration: none !important;
+        color: white !important;
+        transition: 0.3s;
+        border: none;
+    }
+
+    .btn-easy { background: linear-gradient(135deg, var(--accent-green), #00d2ff); }
+    .btn-normal { background: linear-gradient(135deg, var(--accent-yellow), #ff9500); color: #000 !important; }
+    .btn-hard { background: linear-gradient(135deg, var(--accent-purple), var(--accent-red)); }
+
+    .btn-action:hover {
+        transform: scale(1.03);
+        filter: brightness(1.1);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .icon-easy { color: var(--accent-green); }
+    .icon-normal { color: var(--accent-yellow); }
+    .icon-hard { color: var(--accent-purple); }
+</style>
+
+<div class="subject-page">
+    <div class="header-section">
+        <h2 style="text-align: center; font-size: 8ex;">Informatics</h2>
+        <p class="sub-text">The world of algorithms and technology</p>
+    </div>
+
+    <div class="cards-wrapper">
+
+        <!-- EASY -->
+        <div class="level-card">
+            <div class="icon-wrapper icon-easy">
+                <!-- computer icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="60">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
+                </svg>
+            </div>
+            <h3>Easy</h3>
+            <p>Basics of IT and computer literacy.</p>
+            <a href="{% url 'subjects:informatics_easy_english' %}" class="btn-action btn-easy">Start</a>
+        </div>
+
+        <!-- MEDIUM -->
+        <div class="level-card">
+            <div class="icon-wrapper icon-normal">
+                <!-- cpu icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="60">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5m-15 7.5H3m18 0h-1.5m-15-10.5a2.25 2.25 0 012.25-2.25h9a2.25 2.25 0 012.25 2.25v10.5A2.25 2.25 0 0118 18.75h-9a2.25 2.25 0 01-2.25-2.25V5.25Zm.75 0v10.5c0 .414.336.75.75.75h9a.75.75 0 00.75-.75V5.25a.75.75 0 00-.75-.75h-9a.75.75 0 00-.75.75ZM9.75 6.75h4.5a.75.75 0 01.75.75v4.5a.75.75 0 01-.75.75h-4.5a.75.75 0 01-.75-.75v-4.5a.75.75 0 01.75-.75Z" />
+                </svg>
+            </div>
+            <h3>Medium</h3>
+            <p>Algorithms and logical gates.</p>
+            <a href="{% url 'subjects:informatics_normal_english' %}" class="btn-action btn-normal">Start</a>
+        </div>
+
+        <!-- HARD -->
+        <div class="level-card">
+            <div class="icon-wrapper icon-hard">
+                <!-- code icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="60">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                </svg>
+            </div>
+            <h3>Hard</h3>
+            <p>Programming and cybersecurity basics.</p>
+            <a href="{% url 'subjects:informatics_hard_english' %}" class="btn-action btn-hard">Start</a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const cards = document.querySelectorAll(".level-card");
+        cards.forEach((card, index) => {
+            card.style.opacity = "0";
+            card.style.transform = "translateY(30px)";
+            setTimeout(() => {
+                card.style.transition = "all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+                card.style.opacity = "1";
+                card.style.transform = "translateY(0)";
+            }, index * 150);
+        });
+    });
+</script>
+
+{% endblock %}

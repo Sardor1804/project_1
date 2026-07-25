@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natija - {{ test.title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
+<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'>
+  <defs>
+    <!-- Asosiy yorqin gradiyent -->
+    <linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'>
+      <stop offset='0%25' stop-color='%2300f2ff'/>
+      <stop offset='50%25' stop-color='%237000ff'/>
+      <stop offset='100%25' stop-color='%23ff00c8'/>
+    </linearGradient>
+    
+    <!-- Yumshoq soya effekti -->
+    <filter id='f' x='-20%25' y='-20%25' width='140%25' height='140%25'>
+      <feGaussianBlur in='SourceAlpha' stdDeviation='3'/>
+      <feOffset dx='0' dy='4' result='offsetblur'/>
+      <feComponentTransfer>
+        <feFuncA type='linear' slope='0.5'/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in='SourceGraphic'/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Fon (Kvadrat) -->
+  <rect width='128' height='128' rx='32' fill='%230f0f12'/>
+  
+  <!-- Gradiyentli doira va porlash -->
+  <circle cx='64' cy='64' r='42' fill='url(%23g)' opacity='0.15'/>
+  <circle cx='64' cy='64' r='36' fill='url(%23g)' filter='url(%23f)'/>
+
+  <!-- Markaziy harf -->
+  <text x='50%25' y='52%25' 
+        font-size='42' 
+        fill='white' 
+        font-family='Segoe UI, Roboto, Helvetica, sans-serif'
+        text-anchor='middle' 
+        dominant-baseline='middle' 
+        font-weight='900'
+        style='text-shadow: 0 2px 10px rgba(0,0,0,0.3);'>
+    M
+  </text>
+</svg>">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --success: #10b981;
+            --danger: #f43f5e;
+            --warning: #f59e0b;
+            --surface: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg: #f8fafc;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 440px;
+            padding: 20px;
+            perspective: 1000px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 32px;
+            padding: 48px 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transform-style: preserve-3d;
+            animation: cardEntrance 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: scale(0.9) translateY(40px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        h1 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+
+        /* Stats Circle */
+        .result-visual {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 32px;
+        }
+
+        svg {
+            width: 220px;
+            height: 220px;
+            transform: rotate(-90deg);
+        }
+
+        .outer-ring {
+            fill: none;
+            stroke: #e2e8f0;
+            stroke-width: 12;
+        }
+
+        .progress-ring {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 12;
+            stroke-linecap: round;
+            stroke-dasharray: 597; /* 2 * PI * 95 */
+            stroke-dashoffset: 597;
+            transition: stroke-dashoffset 2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .score-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .percent-num {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1;
+            display: block;
+        }
+
+        .percent-symbol {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Message Styles */
+        .feedback-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+        }
+
+        .detail-text {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 40px;
+        }
+
+        .detail-text b { color: var(--text-main); }
+
+        /* Modern Buttons */
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 18px 24px;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--text-main);
+            color: white;
+            box-shadow: 0 10px 20px -5px rgba(30, 41, 59, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(30, 41, 59, 0.4);
+            background: #000;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-main);
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .btn:active { transform: scale(0.98); }
+
+        /* Status Colors */
+        .status-high { color: var(--success); background: #ecfdf5; }
+        .status-mid { color: var(--primary); background: #eef2ff; }
+        .status-low { color: var(--danger); background: #fff1f2; }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+            <h1>Test Natijasi</h1>
+
+            {% widthratio score total 100 as percentage %}
+            <input type="hidden" id="raw-score" value="{{ percentage|default:0 }}">
+
+            <div class="result-visual">
+                <svg viewBox="0 0 200 200">
+                    <circle class="outer-ring" cx="100" cy="100" r="95"></circle>
+                    <circle id="bar" class="progress-ring" cx="100" cy="100" r="95"></circle>
+                </svg>
+                <div class="score-display">
+                    <span class="percent-num" id="counter">0</span>
+                    <span class="percent-symbol">Umumiy ball</span>
+                </div>
+            </div>
+
+            <div id="status-badge" class="feedback-badge">Hisoblanmoqda...</div>
+            
+            <p class="detail-text">
+                To'g'ri javoblar: <b>{{ score }}</b> / {{ total }}
+            </p>
+
+            <div class="actions">
+
+                <a href="/" class="btn btn-secondary">
+                    Bosh sahifaga qaytish
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const score = parseInt(document.getElementById('raw-score').value);
+            const bar = document.getElementById('bar');
+            const counter = document.getElementById('counter');
+            const badge = document.getElementById('status-badge');
+
+            // 1. Dinamik UI sozlamalari
+            let statusClass, statusText, strokeColor;
+
+            if (score >= 85) {
+                statusClass = 'status-high';
+                statusText = "A'lo darajada! 🏆";
+                strokeColor = '#10b981';
+            } else if (score >= 60) {
+                statusClass = 'status-mid';
+                statusText = 'Yaxshi natija! 👍';
+                strokeColor = '#6366f1';
+            } else {
+                statusClass = 'status-low';
+                statusText = 'Yana harakat qiling 📚';
+                strokeColor = '#f43f5e';
+            }
+
+            badge.classList.add(statusClass);
+            badge.innerText = statusText;
+            bar.style.stroke = strokeColor;
+
+            // 2. Animatsiyalarni ishga tushirish
+            setTimeout(() => {
+                // Progress bar animatsiyasi
+                const circumference = 2 * Math.PI * 95;
+                const offset = circumference - (score / 100) * circumference;
+                bar.style.strokeDashoffset = offset;
+
+                // Raqam sanash animatsiyasi
+                let start = 0;
+                const duration = 2000;
+                const increment = score / (duration / 16);
+                
+                const countInterval = setInterval(() => {
+                    start += increment;
+                    if (start >= score) {
+                        counter.innerText = score;
+                        clearInterval(countInterval);
+                    } else {
+                        counter.innerText = Math.floor(start);
+                    }
+                }, 16);
+
+                // G'alaba effekti
+                if (score >= 70) {
+                    confetti({
+                        particleCount: 150,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: [strokeColor, '#ffffff']
+                    });
+                }
+            }, 300);
+        });
+    </script>
+</body>
+</html>

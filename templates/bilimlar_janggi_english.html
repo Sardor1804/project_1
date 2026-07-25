@@ -1,0 +1,755 @@
+{% include "navbar.html" %}
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KNOWLEDGE BATTLE ⚡</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c14;
+    --surface: #0d1421;
+    --card: #111827;
+    --accent: #00f5ff;
+    --accent2: #ff0080;
+    --accent3: #7c3aed;
+    --correct: #00ff88;
+    --wrong: #ff3355;
+    --text: #e2e8f0;
+    --muted: #64748b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: gridMove 20s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes gridMove {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(50px); }
+  }
+
+  .particle {
+    position: fixed;
+    width: 2px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: float linear infinite;
+    pointer-events: none;
+    box-shadow: 0 0 6px var(--accent);
+  }
+
+  @keyframes float {
+    0% { transform: translateY(100vh); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-100px); opacity: 0; }
+  }
+
+  .screen {
+    display: none;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
+  .screen.active { display: flex; }
+
+  /* ===== START SCREEN ===== */
+  .logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    animation: logoGlow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes logoGlow {
+    from { filter: drop-shadow(0 0 20px rgba(0,245,255,0.3)); }
+    to { filter: drop-shadow(0 0 50px rgba(255,0,128,0.5)); }
+  }
+
+  .subtitle {
+    font-size: 1.2rem;
+    color: var(--muted);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 60px;
+    text-align: center;
+  }
+
+  .start-btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 18px 60px;
+    background: transparent;
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    cursor: pointer;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+  }
+
+  .start-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+  }
+
+  .start-btn:hover::before { transform: translateX(0); }
+  .start-btn:hover { color: var(--bg); box-shadow: 0 0 20px rgba(0,245,255,0.5); }
+  .start-btn span { position: relative; z-index: 1; }
+
+  .stats-preview {
+    margin-top: 50px;
+    display: flex;
+    gap: 40px;
+  }
+
+  .stat-item { text-align: center; font-family: 'Orbitron', sans-serif; }
+  .stat-num { font-size: 2rem; font-weight: 900; color: var(--accent); display: block; }
+  .stat-label { font-size: 0.7rem; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+
+  /* ===== HUD ===== */
+  .hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(0,245,255,0.1);
+    width: 100%;
+  }
+
+  .hud-item {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .hud-value {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--accent);
+    display: block;
+  }
+
+  /* ===== PROGRESS ===== */
+  .progress-container {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.05);
+    margin-bottom: 30px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent3), var(--accent), var(--accent2));
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* ===== QUESTION CARD ===== */
+  .question-card {
+    background: var(--card);
+    border: 1px solid rgba(0,245,255,0.1);
+    padding: 35px 40px;
+    margin-bottom: 30px;
+    position: relative;
+    clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+    animation: slideIn 0.4s cubic-bezier(0.4,0,0.2,1);
+    width: 100%;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-20px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent3), var(--accent), var(--accent2));
+  }
+
+  .q-number {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+  }
+
+  .question-text {
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  /* ===== ANSWERS — 4 corners ===== */
+  .answers-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 320px;
+  }
+
+  .answer-btn {
+    position: absolute;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 46%;
+    transition: all 0.2s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+
+  .answer-btn:nth-child(1) { top: 0;    left: 0;   animation-delay: 0.1s; }
+  .answer-btn:nth-child(2) { top: 0;    right: 0;  animation-delay: 0.2s; }
+  .answer-btn:nth-child(3) { bottom: 0; left: 0;   animation-delay: 0.3s; }
+  .answer-btn:nth-child(4) { bottom: 0; right: 0;  animation-delay: 0.4s; }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.5); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .answer-btn:hover {
+    border-color: var(--accent);
+    background: rgba(0,245,255,0.05);
+    box-shadow: 0 0 15px rgba(0,245,255,0.2);
+    transform: scale(1.03);
+    z-index: 10;
+  }
+
+  .answer-letter {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 900;
+    color: var(--accent);
+    background: rgba(0,245,255,0.1);
+    padding: 3px 8px;
+    flex-shrink: 0;
+  }
+
+  /* ===== CORRECT / WRONG ===== */
+  .answer-btn.correct {
+    background: rgba(0,255,136,0.15) !important;
+    border-color: var(--correct) !important;
+    color: var(--correct) !important;
+    box-shadow: 0 0 30px rgba(0,255,136,0.5) !important;
+    animation: correctPulse 0.5s ease !important;
+  }
+
+  @keyframes correctPulse {
+    0%   { transform: scale(1); }
+    30%  { transform: scale(1.07); }
+    60%  { transform: scale(0.97); }
+    100% { transform: scale(1); }
+  }
+
+  .answer-btn.wrong {
+    background: rgba(255,51,85,0.15) !important;
+    border-color: var(--wrong) !important;
+    color: var(--wrong) !important;
+    box-shadow: 0 0 30px rgba(255,51,85,0.5) !important;
+    animation: shake 0.4s ease !important;
+  }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%     { transform: translateX(-8px); }
+    40%     { transform: translateX(8px); }
+    60%     { transform: translateX(-5px); }
+    80%     { transform: translateX(5px); }
+  }
+
+  .answer-btn:disabled { cursor: not-allowed; }
+
+  /* ===== FLASH OVERLAY ===== */
+  .flash-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+  }
+
+  .flash-overlay.correct-flash {
+    background: radial-gradient(ellipse at center, rgba(0,255,136,0.3), transparent 70%);
+    animation: flashIn 0.6s ease forwards;
+  }
+
+  .flash-overlay.wrong-flash {
+    background: radial-gradient(ellipse at center, rgba(255,51,85,0.3), transparent 70%);
+    animation: flashIn 0.6s ease forwards;
+  }
+
+  @keyframes flashIn {
+    0%   { opacity: 0; }
+    30%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* ===== SCORE POPUP ===== */
+  .score-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 4rem;
+    font-weight: 900;
+    pointer-events: none;
+    z-index: 10000;
+    opacity: 0;
+  }
+
+  .score-popup.show-correct {
+    color: var(--correct);
+    text-shadow: 0 0 40px var(--correct);
+    animation: scoreAnim 0.8s ease forwards;
+  }
+
+  .score-popup.show-wrong {
+    color: var(--wrong);
+    text-shadow: 0 0 40px var(--wrong);
+    animation: scoreAnim 0.8s ease forwards;
+  }
+
+  @keyframes scoreAnim {
+    0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.5); }
+    40%  { opacity: 1; transform: translate(-50%,-65%) scale(1.2); }
+    70%  { opacity: 1; transform: translate(-50%,-75%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%,-95%) scale(0.8); }
+  }
+
+  /* ===== RESULT SCREEN ===== */
+  .result-card {
+    background: var(--card);
+    border: 1px solid rgba(0,245,255,0.15);
+    padding: 50px 60px;
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    clip-path: polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 30px 100%, 0 calc(100% - 30px));
+    animation: resultReveal 0.8s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes resultReveal {
+    from { opacity: 0; transform: scale(0.7); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .result-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent3), var(--accent), var(--accent2));
+  }
+
+  .result-emoji {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    display: block;
+    animation: bounce 1s ease infinite;
+  }
+
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-10px); }
+  }
+
+  .result-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: var(--accent);
+    margin-bottom: 30px;
+  }
+
+  .score-big {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+  }
+
+  .score-total  { font-family:'Orbitron',sans-serif; font-size:1.5rem; color:var(--muted); margin-top:5px; }
+  .score-pct    { font-family:'Orbitron',sans-serif; font-size:0.8rem; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin: 8px 0 25px; }
+
+  .result-rank {
+    display: inline-block;
+    padding: 8px 24px;
+    border: 1px solid;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 35px;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+
+  .rank-god    { border-color:#ffd700; color:#ffd700; background:rgba(255,215,0,0.1); }
+  .rank-master { border-color:var(--accent); color:var(--accent); background:rgba(0,245,255,0.1); }
+  .rank-good   { border-color:var(--correct); color:var(--correct); background:rgba(0,255,136,0.1); }
+  .rank-ok     { border-color:#ff9500; color:#ff9500; background:rgba(255,149,0,0.1); }
+  .rank-bad    { border-color:var(--wrong); color:var(--wrong); background:rgba(255,51,85,0.1); }
+
+  .restart-btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 15px 40px;
+    background: transparent;
+    border: 2px solid var(--accent2);
+    color: var(--accent2);
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+  }
+
+  .restart-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent2);
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+  }
+
+  .restart-btn:hover::before { transform: translateX(0); }
+  .restart-btn:hover { color: white; }
+  .restart-btn span { position: relative; z-index: 1; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 600px) {
+    .answer-btn { width: 48%; font-size: 0.82rem; padding: 12px 10px; gap: 7px; }
+    .answers-wrapper { min-height: 260px; }
+    .question-card { padding: 22px 18px; }
+    .result-card { padding: 30px 20px; }
+    .score-big { font-size: 3.5rem; }
+    #quizScreen { padding: 10px; max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div id="particles"></div>
+<div class="flash-overlay" id="flashOverlay"></div>
+<div class="score-popup"   id="scorePopup"></div>
+
+<!-- START -->
+<div class="screen active" id="startScreen">
+  <div class="logo">KNOWLEDGE<br>BATTLE</div>
+  <div class="subtitle">⚡ Intelligence Test ⚡</div>
+  <button class="start-btn" onclick="startQuiz()"><span>START</span></button>
+  <div class="stats-preview">
+    <div class="stat-item"><span class="stat-num">30</span><span class="stat-label">Questions</span></div>
+    <div class="stat-item"><span class="stat-num">4</span><span class="stat-label">Choices</span></div>
+    <div class="stat-item"><span class="stat-num">∞</span><span class="stat-label">Knowledge</span></div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="quizScreen" style="max-width:900px;width:100%;margin:0 auto;">
+  <div class="hud">
+    <div class="hud-item">Question<span class="hud-value" id="qNum">1/30</span></div>
+    <div class="hud-item" style="text-align:center">Correct<span class="hud-value" id="scoreHud" style="color:var(--correct)">0</span></div>
+    <div class="hud-item" style="text-align:right">Wrong<span class="hud-value" id="wrongHud" style="color:var(--wrong)">0</span></div>
+  </div>
+  <div class="progress-container">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div class="question-card">
+    <div class="q-number" id="qLabel">QUESTION 01</div>
+    <div class="question-text" id="questionText"></div>
+  </div>
+  <div class="answers-wrapper" id="answersWrapper"></div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="resultScreen">
+  <div class="result-card">
+    <span class="result-emoji" id="resultEmoji">🏆</span>
+    <div class="result-title"  id="resultTitle">RESULT</div>
+    <div class="score-big"  id="scoreBig">0</div>
+    <div class="score-total" id="scoreTotal">/ 30</div>
+    <div class="score-pct"   id="scorePct">0%</div>
+    <div class="result-rank" id="resultRank">RANK</div><br>
+    <button class="restart-btn" onclick="restartQuiz()"><span>🔄 PLAY AGAIN</span></button>
+  </div>
+</div>
+
+<script>
+// ===== QUESTIONS =====
+const ALL_QUESTIONS = [
+  { q:"What is the capital of Uzbekistan?",                              a:["Tashkent","Samarkand","Bukhara","Namangan"],           c:0 },
+  { q:"Which is the largest planet in the Solar System?",               a:["Saturn","Uranus","Jupiter","Neptune"],                  c:2 },
+  { q:"1 + 1 = ?",                                                      a:["1","3","2","4"],                                       c:2 },
+  { q:"At what temperature does water boil (at sea level)?",            a:["80°C","90°C","95°C","100°C"],                          c:3 },
+  { q:"How many bones does the human body have?",                       a:["186","206","226","246"],                               c:1 },
+  { q:"Which is the longest river in the world?",                       a:["Amazon","Nile","Yangtze","Mississippi"],               c:1 },
+  { q:"What does HTML stand for?",                                      a:["Hyper Text Markup Language","High Tech Modern Language","Hyper Transfer Meta Link","Home Tool Markup Language"], c:0 },
+  { q:"What is the chemical symbol for gold?",                          a:["Ag","Fe","Au","Cu"],                                   c:2 },
+  { q:"By how many degrees is Earth's axis tilted?",                    a:["23.5°","45°","90°","15°"],                             c:0 },
+  { q:"Which is the largest ocean?",                                    a:["Atlantic","Indian","Pacific","Arctic"],                c:2 },
+  { q:"Where was Mozart from?",                                         a:["Germany","Italy","Austria","France"],                  c:2 },
+  { q:"What does photosynthesis use?",                                  a:["CO2 and water","O2 and nitrogen","Oxygen and glucose","Nitrogen and hydrogen"], c:0 },
+  { q:"How many meters are in 1 kilometer?",                            a:["100 m","10000 m","500 m","1000 m"],                    c:3 },
+  { q:"Which language is spoken by the most people worldwide?",         a:["English","Spanish","Mandarin Chinese","Arabic"],       c:2 },
+  { q:"How is the Pythagorean theorem written?",                        a:["a² + b² = c²","a + b = c","a² - b² = c","ab = c²"],   c:0 },
+  { q:"What is the average salinity of sea water?",                     a:["1.5%","2%","3.5%","5%"],                               c:2 },
+  { q:"Which element is most abundant in air?",                         a:["Oxygen","Nitrogen","Carbon","Argon"],                  c:1 },
+  { q:"What does DNA stand for?",                                       a:["Dynamic Nucleic Acid","Deoxyribonucleic Acid","Double Neutral Atom","Direct Nucleic Array"], c:1 },
+  { q:"What was the ancient name of Samarkand?",                        a:["Maracanda","Sogdiana","Bactria","Parthia"],            c:0 },
+  { q:"Approximately what percentage of the human brain is water?",     a:["50%","60%","75%","90%"],                               c:2 },
+  { q:"Which is the highest mountain in the world?",                    a:["K2","Kangchenjunga","Makalu","Everest"],               c:3 },
+  { q:"In which year was JavaScript created?",                          a:["1991","1993","1995","1999"],                           c:2 },
+  { q:"At what speed does light travel?",                               a:["200,000 km/s","300,000 km/s","400,000 km/s","500,000 km/s"], c:1 },
+  { q:"In which year did Uzbekistan gain independence?",                a:["1989","1990","1991","1992"],                           c:2 },
+  { q:"How many teeth does an adult human have?",                       a:["28","30","32","34"],                                   c:2 },
+  { q:"What was the capital of the Timurid Empire?",                    a:["Bukhara","Samarkand","Tashkent","Khiva"],              c:1 },
+  { q:"Which is the smallest continent?",                               a:["Antarctica","Europe","Australia","South America"],     c:2 },
+  { q:"In which year was Google founded?",                              a:["1996","1997","1998","2000"],                           c:2 },
+  { q:"What is the normal human body temperature?",                     a:["35.5°C","36°C","36.6°C","37.5°C"],                    c:2 },
+  { q:"Which planet is closest to the Sun?",                            a:["Venus","Earth","Mercury","Mars"],                      c:2 },
+];
+
+// ===== STATE =====
+let questions=[], current=0, score=0, wrongCount=0, answered=false;
+
+// ===== PARTICLES =====
+(function createParticles(){
+  const c=document.getElementById('particles');
+  for(let i=0;i<25;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    p.style.left=Math.random()*100+'vw';
+    p.style.animationDuration=(8+Math.random()*15)+'s';
+    p.style.animationDelay=(Math.random()*15)+'s';
+    if(Math.random()>0.6) p.style.background='var(--accent2)';
+    if(Math.random()>0.8) p.style.background='var(--accent3)';
+    c.appendChild(p);
+  }
+})();
+
+// ===== SCREENS =====
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ===== START =====
+function startQuiz(){
+  questions=[...ALL_QUESTIONS].sort(()=>Math.random()-0.5);
+  current=0; score=0; wrongCount=0;
+  showScreen('quizScreen');
+  loadQuestion();
+}
+
+// ===== LOAD QUESTION =====
+function loadQuestion(){
+  answered=false;
+  const q=questions[current];
+  const total=questions.length;
+
+  document.getElementById('qNum').textContent=`${current+1}/${total}`;
+  document.getElementById('qLabel').textContent=`QUESTION ${String(current+1).padStart(2,'0')}`;
+  document.getElementById('questionText').textContent=q.q;
+  document.getElementById('scoreHud').textContent=score;
+  document.getElementById('wrongHud').textContent=wrongCount;
+  document.getElementById('progressFill').style.width=(current/total*100)+'%';
+
+  const letters=['A','B','C','D'];
+  const order=[0,1,2,3].sort(()=>Math.random()-0.5);
+
+  const wrapper=document.getElementById('answersWrapper');
+  wrapper.innerHTML='';
+
+  order.forEach((origIdx,i)=>{
+    const btn=document.createElement('button');
+    btn.className='answer-btn';
+    btn.dataset.correct=(origIdx===q.c)?'1':'0';
+    btn.innerHTML=`<span class="answer-letter">${letters[i]}</span>${q.a[origIdx]}`;
+    btn.onclick=()=>handleAnswer(btn);
+    wrapper.appendChild(btn);
+  });
+}
+
+// ===== HANDLE ANSWER =====
+function handleAnswer(btn){
+  if(answered) return;
+  answered=true;
+
+  const correct=btn.dataset.correct==='1';
+  document.querySelectorAll('.answer-btn').forEach(b=>b.disabled=true);
+
+  if(correct){
+    btn.classList.add('correct');
+    score++;
+    triggerEffect(true);
+  } else {
+    btn.classList.add('wrong');
+    wrongCount++;
+    triggerEffect(false);
+    setTimeout(()=>{
+      document.querySelectorAll('.answer-btn').forEach(b=>{
+        if(b.dataset.correct==='1') b.classList.add('correct');
+      });
+    },150);
+  }
+
+  document.getElementById('scoreHud').textContent=score;
+  document.getElementById('wrongHud').textContent=wrongCount;
+
+  setTimeout(()=>{
+    current++;
+    if(current>=questions.length) showResult();
+    else loadQuestion();
+  }, 1100);
+}
+
+// ===== EFFECTS =====
+function triggerEffect(correct){
+  const ov=document.getElementById('flashOverlay');
+  ov.className='flash-overlay '+(correct?'correct-flash':'wrong-flash');
+  setTimeout(()=>ov.className='flash-overlay',700);
+
+  const pop=document.getElementById('scorePopup');
+  pop.textContent=correct?'+1 ✓':'✗';
+  pop.className='score-popup '+(correct?'show-correct':'show-wrong');
+  setTimeout(()=>pop.className='score-popup',900);
+
+  if(correct) spawnCornerBursts();
+}
+
+function spawnCornerBursts(){
+  [
+    {top:'0',left:'0'},
+    {top:'0',right:'0'},
+    {bottom:'0',left:'0'},
+    {bottom:'0',right:'0'}
+  ].forEach(pos=>{
+    const el=document.createElement('div');
+    Object.assign(el.style,{
+      position:'fixed', width:'120px', height:'120px',
+      pointerEvents:'none', zIndex:'9998', opacity:'0',
+      ...pos
+    });
+    const dots=Array.from({length:10},(_,i)=>{
+      const a=(i/10)*360;
+      const r=30+Math.random()*30;
+      const x=60+r*Math.cos(a*Math.PI/180);
+      const y=60+r*Math.sin(a*Math.PI/180);
+      const col=Math.random()>0.5?'#00f5ff':'#00ff88';
+      return `<circle cx="${x}" cy="${y}" r="${2+Math.random()*3}" fill="${col}"/>`;
+    }).join('');
+    el.innerHTML=`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">${dots}</svg>`;
+    document.body.appendChild(el);
+    el.animate([
+      {opacity:0,transform:'scale(0) rotate(0deg)'},
+      {opacity:1,transform:'scale(1.5) rotate(180deg)',offset:0.5},
+      {opacity:0,transform:'scale(2) rotate(360deg)'}
+    ],{duration:800,easing:'ease'}).onfinish=()=>el.remove();
+  });
+}
+
+// ===== RESULT =====
+function showResult(){
+  showScreen('resultScreen');
+  const total=questions.length;
+  const pct=Math.round(score/total*100);
+
+  document.getElementById('scoreTotal').textContent=`/ ${total}`;
+  document.getElementById('scorePct').textContent=`${pct}% Correct`;
+
+  let emoji,title,rankClass,rankText;
+  if(pct===100){ emoji='🏆'; title="ABSOLUTE CHAMPION!"; rankClass='rank-god';    rankText='👑 GENIUS'; }
+  else if(pct>=80){ emoji='⚡'; title="GREAT RESULT!";   rankClass='rank-master'; rankText='⚡ MASTER'; }
+  else if(pct>=60){ emoji='✅'; title="WELL DONE!";       rankClass='rank-good';   rankText='✅ GOOD'; }
+  else if(pct>=40){ emoji='😤'; title="AVERAGE";          rankClass='rank-ok';     rankText='😤 OK'; }
+  else             { emoji='💀'; title="STUDY MORE!";     rankClass='rank-bad';    rankText='💀 NEWBIE'; }
+
+  document.getElementById('resultEmoji').textContent=emoji;
+  document.getElementById('resultTitle').textContent=title;
+  const rankEl=document.getElementById('resultRank');
+  rankEl.textContent=rankText;
+  rankEl.className='result-rank '+rankClass;
+
+  let n=0;
+  document.getElementById('scoreBig').textContent=0;
+  const iv=setInterval(()=>{
+    if(n>=score){ clearInterval(iv); return; }
+    document.getElementById('scoreBig').textContent=++n;
+  },60);
+
+  if(pct>=60) spawnCornerBursts();
+}
+
+function restartQuiz(){ startQuiz(); }
+</script>
+</body>
+</html>

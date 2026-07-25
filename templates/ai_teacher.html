@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Teacher — Sardor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBF9F2;
+    --paper-2:#F3EFE2;
+    --ink:#20263B;
+    --ink-soft:#5B6178;
+    --margin-red:#BE4234;
+    --chalk-green:#2F6F5E;
+    --chalk-green-soft:#E4EFE9;
+    --highlight:#F2C245;
+    --highlight-soft:#FBEDC7;
+    --grid-line: rgba(32,38,59,0.07);
+    --shadow: 0 10px 24px rgba(32,38,59,0.10);
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(
+        var(--paper) 0px, var(--paper) 31px,
+        var(--grid-line) 32px
+      );
+    font-family:'Manrope', sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3, .hand{
+    font-family:'Caveat', cursive;
+    font-weight:700;
+    letter-spacing:0.2px;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  /* ---------- Shell layout ---------- */
+  .shell{
+    max-width:960px;
+    margin:0 auto;
+    padding:28px 20px 60px 64px;
+    position:relative;
+  }
+  .margin-line{
+    position:fixed;
+    top:0; bottom:0; left:36px;
+    width:2px;
+    background:var(--margin-red);
+    opacity:0.55;
+  }
+  .margin-line::before, .margin-line::after{
+    content:'';
+    position:fixed;
+    left:0; width:8px; height:8px;
+    border-radius:50%;
+    background:var(--margin-red);
+    opacity:0.55;
+  }
+
+  /* address / route bar — the "url" signature */
+  .addressbar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--paper-2);
+    border:1px solid rgba(32,38,59,0.12);
+    border-radius:999px;
+    padding:8px 16px;
+    margin-bottom:22px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+    max-width:100%;
+    overflow:hidden;
+  }
+  .addressbar .dots{display:flex; gap:5px; flex:0 0 auto;}
+  .addressbar .dots span{width:7px;height:7px;border-radius:50%;background:rgba(32,38,59,0.18);}
+  .addressbar .url{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .addressbar .url b{color:var(--ink); font-weight:600;}
+
+  /* top identity row */
+  header.top{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:22px;
+    flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand .badge{
+    width:44px;height:44px;border-radius:10px;
+    background:var(--ink);
+    color:var(--paper);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Caveat',cursive; font-size:24px; font-weight:700;
+    transform:rotate(-4deg);
+    box-shadow: var(--shadow);
+  }
+  .brand .titles h1{font-size:30px;margin:0;line-height:1;}
+  .brand .titles p{margin:2px 0 0; font-size:13px; color:var(--ink-soft);}
+
+  /* notebook tab navigation */
+  nav.tabs{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  nav.tabs button{
+    font-family:'Manrope', sans-serif;
+    font-weight:700;
+    font-size:13.5px;
+    padding:9px 16px 8px;
+    border:1px solid rgba(32,38,59,0.14);
+    border-bottom:none;
+    border-radius:10px 10px 0 0;
+    background:var(--paper-2);
+    color:var(--ink-soft);
+    cursor:pointer;
+    position:relative;
+    top:1px;
+    transition:all .15s ease;
+  }
+  nav.tabs button.active{
+    background:var(--paper);
+    color:var(--ink);
+    box-shadow: var(--shadow);
+    border-bottom:1px solid var(--paper);
+  }
+  nav.tabs button:hover:not(.active){ color:var(--ink); }
+
+  /* page card */
+  .page{
+    background:var(--paper);
+    border:1px solid rgba(32,38,59,0.12);
+    border-radius:0 var(--radius) var(--radius) var(--radius);
+    box-shadow:var(--shadow);
+    padding:28px 26px;
+    display:none;
+    animation:fadeIn .25s ease;
+  }
+  .page.active{display:block;}
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+  .eyebrow{
+    text-transform:uppercase;
+    font-size:11px;
+    letter-spacing:1.4px;
+    color:var(--ink-soft);
+    font-weight:700;
+    margin:0 0 6px;
+  }
+  .page h2{font-size:32px; margin:0 0 4px;}
+  .lede{color:var(--ink-soft); font-size:14.5px; margin:0 0 22px;}
+
+  /* ---------- Dashboard ---------- */
+  .greeting{
+    font-size:22px;
+    margin:0 0 20px;
+  }
+  .greeting b{ color:var(--margin-red); }
+
+  .grades{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(150px,1fr));
+    gap:14px;
+    margin-bottom:24px;
+  }
+  .grade-card{
+    background:var(--paper-2);
+    border-radius:12px;
+    padding:16px 16px 14px;
+    text-align:center;
+    position:relative;
+  }
+  .grade-card .subj{font-size:13.5px; font-weight:700; color:var(--ink);}
+  .grade-circle{
+    width:74px;height:74px;
+    margin:10px auto 8px;
+    border-radius:50%;
+    border:3px solid var(--margin-red);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Caveat', cursive;
+    font-size:26px;font-weight:700;
+    color:var(--margin-red);
+    transform:rotate(-3deg);
+  }
+  .grade-card.top .grade-circle{ border-color:var(--chalk-green); color:var(--chalk-green); }
+  .grade-card .tag{
+    font-size:11px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace;
+  }
+
+  .section-title{
+    font-size:22px;
+    margin:26px 0 10px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .section-title .ico{font-size:19px;}
+
+  .analysis-card{
+    background:var(--chalk-green-soft);
+    border-left:4px solid var(--chalk-green);
+    border-radius:10px;
+    padding:16px 18px;
+    font-size:14.5px;
+    line-height:1.65;
+  }
+  .analysis-card strong{color:var(--chalk-green);}
+
+  .recs{
+    list-style:none;
+    margin:12px 0 0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .recs li{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:var(--highlight-soft);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:14px;
+  }
+  .recs li .check{
+    width:22px;height:22px;flex:0 0 auto;
+    border-radius:50%;
+    background:var(--highlight);
+    color:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px; font-weight:700;
+  }
+
+  .test-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(200px,1fr));
+    gap:14px;
+    margin-top:12px;
+  }
+  .test-card{
+    border:1px solid rgba(32,38,59,0.12);
+    border-radius:12px;
+    padding:16px;
+    background:var(--paper);
+    transition:transform .15s ease, box-shadow .15s ease;
+    cursor:pointer;
+  }
+  .test-card:hover{ transform:translateY(-3px); box-shadow:var(--shadow); }
+  .test-card .emoji{font-size:26px;}
+  .test-card h3{margin:8px 0 2px; font-size:20px;}
+  .test-card p{margin:0; font-size:12.5px; color:var(--ink-soft);}
+  .test-card .go{
+    display:inline-block; margin-top:10px;
+    font-size:12px; font-weight:700; color:var(--margin-red);
+    font-family:'IBM Plex Mono', monospace;
+  }
+
+  /* ---------- Chat ---------- */
+  .chat-window{
+    height:400px;
+    overflow-y:auto;
+    background:var(--paper-2);
+    border-radius:12px;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .msg{ max-width:78%; padding:10px 14px; border-radius:14px; font-size:14.5px; line-height:1.5; }
+  .msg.user{ align-self:flex-end; background:var(--ink); color:var(--paper); border-bottom-right-radius:4px; }
+  .msg.ai{ align-self:flex-start; background:var(--paper); border:1px solid rgba(32,38,59,0.12); border-bottom-left-radius:4px; }
+  .msg.ai b.name{ display:block; font-size:11px; color:var(--chalk-green); font-family:'IBM Plex Mono',monospace; margin-bottom:3px; }
+  .msg.typing{ font-style:italic; color:var(--ink-soft); }
+
+  .chat-input-row{
+    display:flex; gap:10px; margin-top:14px;
+  }
+  .chat-input-row input{
+    flex:1;
+    padding:13px 16px;
+    border-radius:12px;
+    border:1px solid rgba(32,38,59,0.18);
+    font-family:'Manrope',sans-serif;
+    font-size:14.5px;
+    background:var(--paper);
+  }
+  .chat-input-row input:focus{ outline:2px solid var(--chalk-green); outline-offset:1px; }
+  .btn{
+    padding:12px 20px;
+    border-radius:12px;
+    border:none;
+    background:var(--ink);
+    color:var(--paper);
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    font-family:'Manrope',sans-serif;
+  }
+  .btn:hover{ background:#333c58; }
+  .btn:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  /* ---------- Speaking ---------- */
+  .speak-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:18px;
+    padding:14px 0 6px;
+  }
+  .mic-btn{
+    width:120px;height:120px;
+    border-radius:50%;
+    border:none;
+    background:var(--ink);
+    color:var(--paper);
+    font-size:42px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow: var(--shadow);
+    transition:transform .15s ease, background .2s ease;
+  }
+  .mic-btn:hover{ transform:scale(1.03); }
+  .mic-btn.listening{
+    background:var(--margin-red);
+    animation:pulse 1.2s infinite;
+  }
+  @keyframes pulse{
+    0%{ box-shadow:0 0 0 0 rgba(190,66,52,0.45); }
+    70%{ box-shadow:0 0 0 22px rgba(190,66,52,0); }
+    100%{ box-shadow:0 0 0 0 rgba(190,66,52,0); }
+  }
+  .mic-status{ font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--ink-soft); text-align:center; min-height:16px; }
+
+  .transcript-box{
+    width:100%;
+    max-width:560px;
+    background:var(--paper-2);
+    border-radius:12px;
+    padding:18px;
+    min-height:130px;
+  }
+  .transcript-box .line{ margin-bottom:12px; }
+  .transcript-box .who{ font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; margin-bottom:3px; }
+  .transcript-box .who.you{ color:var(--margin-red); }
+  .transcript-box .who.ai{ color:var(--chalk-green); }
+  .transcript-box .text{ font-size:14.5px; line-height:1.55; }
+  .transcript-box .placeholder{ color:var(--ink-soft); font-size:13.5px; font-style:italic; }
+
+  .speak-controls{ display:flex; gap:10px; }
+  .ghost-btn{
+    padding:9px 16px;
+    border-radius:10px;
+    border:1px solid rgba(32,38,59,0.2);
+    background:transparent;
+    color:var(--ink);
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .not-supported{
+    background:var(--highlight-soft);
+    border-left:4px solid var(--highlight);
+    border-radius:10px;
+    padding:14px 16px;
+    font-size:13.5px;
+    max-width:560px;
+  }
+
+  footer.note{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:12px;
+    margin-top:26px;
+  }
+
+  @media (max-width:600px){
+    .shell{ padding:22px 14px 40px 40px; }
+    .margin-line{ left:20px; }
+    .page{ padding:20px 16px; }
+    .chat-window{ height:340px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="margin-line"></div>
+
+<div class="shell">
+
+  <div class="addressbar">
+    <div class="dots"><span></span><span></span><span></span></div>
+    <div class="url">app://ai-teacher/<b id="route-label">dashboard</b></div>
+  </div>
+
+  <header class="top">
+    <div class="brand">
+      <div class="badge">AI</div>
+      <div class="titles">
+        <h1>AI Teacher</h1>
+        <p>Sardor uchun shaxsiy o'quv yordamchisi</p>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button data-route="dashboard">📊 Dashboard</button>
+      <button data-route="chat">💬 Suhbat</button>
+      <button data-route="speaking">🎙️ Speaking</button>
+      <button data-route="tests">🎯 Testlar</button>
+    </nav>
+  </header>
+
+  <!-- ================= DASHBOARD ================= -->
+  <section class="page" id="page-dashboard">
+    <p class="eyebrow">Bugungi hisobot</p>
+    <h2>👋 Salom, Sardor!</h2>
+    <p class="greeting">Bugungi natijalaringiz tayyor — <b>3 ta fan</b> bo'yicha tekshirildi.</p>
+
+    <div class="grades">
+      <div class="grade-card">
+        <div class="subj">🇬🇧 Ingliz tili</div>
+        <div class="grade-circle">8/10</div>
+        <div class="tag">80% to'g'ri</div>
+      </div>
+      <div class="grade-card">
+        <div class="subj">➗ Matematika</div>
+        <div class="grade-circle">6/10</div>
+        <div class="tag">60% to'g'ri</div>
+      </div>
+      <div class="grade-card top">
+        <div class="subj">💻 Informatika</div>
+        <div class="grade-circle">9/10</div>
+        <div class="tag">eng kuchli fan</div>
+      </div>
+    </div>
+
+    <div class="section-title"><span class="ico">📊</span> AI tahlili</div>
+    <div class="analysis-card">
+      Sizning eng kuchli faningiz — <strong>Informatika</strong>.<br>
+      Matematikada <strong>kasrlar</strong> mavzusida ko'proq xato qilyapsiz.<br>
+      Oxirgi 7 kun ichida natijangiz <strong>15% yaxshilandi</strong> — davom eting!
+    </div>
+
+    <div class="section-title"><span class="ico">📖</span> AI tavsiyasi</div>
+    <ul class="recs">
+      <li><span class="check">1</span> Bugun 20 daqiqa <b>kasrlar</b> mavzusini o'rganing.</li>
+      <li><span class="check">2</span> Keyin <b>10 ta mashq</b> bajaring.</li>
+      <li><span class="check">3</span> Ertaga <b>nazorat testini</b> yeching.</li>
+    </ul>
+
+    <div class="section-title"><span class="ico">🎯</span> Tavsiya etilgan testlar</div>
+    <div class="test-grid">
+      <div class="test-card" data-goto="tests">
+        <div class="emoji">📗</div>
+        <h3>Present Perfect Quiz</h3>
+        <p>Ingliz tili grammatikasi</p>
+        <span class="go">Testlarga o'tish →</span>
+      </div>
+      <div class="test-card" data-goto="tests">
+        <div class="emoji">📘</div>
+        <h3>Fractions Test</h3>
+        <p>Matematika — kasrlar</p>
+        <span class="go">Testlarga o'tish →</span>
+      </div>
+      <div class="test-card" data-goto="tests">
+        <div class="emoji">📙</div>
+        <h3>Geometry Basics</h3>
+        <p>Matematika — geometriya</p>
+        <span class="go">Testlarga o'tish →</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CHAT ================= -->
+  <section class="page" id="page-chat">
+    <p class="eyebrow">Yozma yordam</p>
+    <h2>💬 AI bilan suhbat</h2>
+    <p class="lede">Har qanday mavzu bo'yicha savol bering — AI o'qituvchi tushuntirib beradi.</p>
+
+    <div class="chat-window" id="chat-window">
+      <div class="msg ai"><b class="name">AI TEACHER</b>Salom Sardor! Menga fanlar bo'yicha savol berishing mumkin. Masalan: "Present Perfectni tushunmadim" yoki "kasrlarni qanday qo'shish mumkin?"</div>
+    </div>
+
+    <div class="chat-input-row">
+      <input type="text" id="chat-input" placeholder="Savolingizni yozing..." />
+      <button class="btn" id="chat-send">Yuborish</button>
+    </div>
+  </section>
+
+  <!-- ================= SPEAKING ================= -->
+  <section class="page" id="page-speaking">
+    <p class="eyebrow">Og'zaki mashq</p>
+    <h2>🎙️ AI bilan Speaking</h2>
+    <p class="lede">Mikrofon tugmasini bosing, inglizcha gapiring — AI eshitadi, tuzatadi va ovoz bilan javob beradi.</p>
+
+    <div id="speaking-unsupported" class="not-supported" style="display:none;">
+      ⚠️ Ushbu brauzer ovozni tanish (Speech Recognition) funksiyasini qo'llab-quvvatlamaydi. Iltimos, Google Chrome brauzeridan foydalaning.
+    </div>
+
+    <div class="speak-wrap" id="speak-wrap">
+      <button class="mic-btn" id="mic-btn" aria-label="Gapirish uchun bosing">🎤</button>
+      <div class="mic-status" id="mic-status">Gapirish uchun mikrofonni bosing</div>
+
+      <div class="transcript-box" id="transcript-box">
+        <p class="placeholder">Suhbat shu yerda ko'rinadi...</p>
+      </div>
+
+      <div class="speak-controls">
+        <button class="ghost-btn" id="replay-btn">🔊 Qayta eshitish</button>
+        <button class="ghost-btn" id="clear-btn">🗑️ Tozalash</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TESTS ================= -->
+  <section class="page" id="page-tests">
+    <p class="eyebrow">Mashq va nazorat</p>
+    <h2>🎯 Tavsiya etilgan testlar</h2>
+    <p class="lede">AI tahliliga asosan tanlangan testlar — zaif tomonlaringizni mustahkamlang.</p>
+
+    <div class="test-grid">
+      <div class="test-card" data-prompt="Present Perfect mavzusi bo'yicha menga qisqacha tushuntirish va 3 ta mashq bering.">
+        <div class="emoji">📗</div>
+        <h3>Present Perfect Quiz</h3>
+        <p>Ingliz tili · 10 savol</p>
+        <span class="go">Boshlash →</span>
+      </div>
+      <div class="test-card" data-prompt="Kasrlar (fractions) mavzusi bo'yicha menga qisqacha tushuntirish va 3 ta mashq bering.">
+        <div class="emoji">📘</div>
+        <h3>Fractions Test</h3>
+        <p>Matematika · 10 savol</p>
+        <span class="go">Boshlash →</span>
+      </div>
+      <div class="test-card" data-prompt="Geometriya asoslari bo'yicha menga qisqacha tushuntirish va 3 ta mashq bering.">
+        <div class="emoji">📙</div>
+        <h3>Geometry Basics</h3>
+        <p>Matematika · 10 savol</p>
+        <span class="go">Boshlash →</span>
+      </div>
+    </div>
+  </section>
+
+  <footer class="note">AI Teacher — daftar uslubidagi shaxsiy o'quv yordamchisi</footer>
+</div>
+
+<script>
+(function(){
+  const routes = ['dashboard','chat','speaking','tests'];
+  const tabs = document.querySelectorAll('nav.tabs button');
+  const routeLabel = document.getElementById('route-label');
+
+  function currentRoute(){
+    const h = (location.hash || '#dashboard').replace('#','');
+    return routes.includes(h) ? h : 'dashboard';
+  }
+
+  function render(){
+    const route = currentRoute();
+    routes.forEach(r=>{
+      document.getElementById('page-'+r).classList.toggle('active', r===route);
+    });
+    tabs.forEach(btn=>{
+      btn.classList.toggle('active', btn.dataset.route===route);
+    });
+    routeLabel.textContent = route;
+    document.title = 'AI Teacher — ' + route[0].toUpperCase() + route.slice(1);
+  }
+
+  tabs.forEach(btn=>{
+    btn.addEventListener('click', ()=>{ location.hash = btn.dataset.route; });
+  });
+
+  document.querySelectorAll('[data-goto]').forEach(el=>{
+    el.addEventListener('click', ()=>{ location.hash = el.dataset.goto; });
+  });
+
+  window.addEventListener('hashchange', render);
+  render();
+
+  // ---------------- Claude API helper ----------------
+  async function askAI(systemPrompt, userText){
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1000,
+        system: systemPrompt,
+        messages:[{ role:'user', content:userText }]
+      })
+    });
+    const data = await res.json();
+    const block = (data.content || []).find(c=>c.type==='text');
+    return block ? block.text : "Kechirasiz, javob olishda xatolik yuz berdi.";
+  }
+
+  // ---------------- CHAT VIEW ----------------
+  const chatWindow = document.getElementById('chat-window');
+  const chatInput = document.getElementById('chat-input');
+  const chatSend = document.getElementById('chat-send');
+
+  function addMsg(role, text){
+    const div = document.createElement('div');
+    div.className = 'msg ' + role;
+    if(role==='ai'){
+      div.innerHTML = '<b class="name">AI TEACHER</b>' + text;
+    } else {
+      div.textContent = text;
+    }
+    chatWindow.appendChild(div);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+    return div;
+  }
+
+  const CHAT_SYSTEM = "Sen 'AI Teacher' — o'quvchi Sardor uchun mehribon, ilhomlantiruvchi shaxsiy o'qituvchisan. U hozircha Ingliz tili, Matematika va Informatika fanlarini o'rganmoqda va matematikada kasrlar mavzusida qiynalmoqda. Faqat o'zbek tilida, qisqa, aniq va do'stona tushuntir. Kerak bo'lsa misollar keltir.";
+
+  async function sendChat(text){
+    if(!text.trim()) return;
+    addMsg('user', text);
+    chatInput.value = '';
+    chatSend.disabled = true;
+    const typing = addMsg('ai typing', 'yozmoqda...');
+    try{
+      const reply = await askAI(CHAT_SYSTEM, text);
+      typing.remove();
+      addMsg('ai', reply.replace(/\n/g,'<br>'));
+    }catch(e){
+      typing.remove();
+      addMsg('ai', "Kechirasiz, ulanishda xatolik yuz berdi. Qaytadan urinib ko'ring.");
+    }
+    chatSend.disabled = false;
+  }
+
+  chatSend.addEventListener('click', ()=> sendChat(chatInput.value));
+  chatInput.addEventListener('keydown', e=>{ if(e.key==='Enter') sendChat(chatInput.value); });
+
+  // test card prompts -> jump to chat with pre-filled question
+  document.querySelectorAll('#page-tests [data-prompt]').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      location.hash = 'chat';
+      setTimeout(()=> sendChat(card.dataset.prompt), 150);
+    });
+  });
+
+  // ---------------- SPEAKING VIEW ----------------
+  const micBtn = document.getElementById('mic-btn');
+  const micStatus = document.getElementById('mic-status');
+  const transcriptBox = document.getElementById('transcript-box');
+  const replayBtn = document.getElementById('replay-btn');
+  const clearBtn = document.getElementById('clear-btn');
+  const unsupportedBox = document.getElementById('speaking-unsupported');
+  const speakWrap = document.getElementById('speak-wrap');
+
+  const SPEAK_SYSTEM = "Sen 'AI Teacher' — o'quvchi Sardor bilan ingliz tilida OG'ZAKI SPEAKING mashqi o'tkazyapsan. Doim ingliz tilida, oddiy va qisqa (2-3 gap) javob ber, keyin agar grammatik xato bo'lsa, qavs ichida bitta qisqa o'zbekcha maslahat qo'sh. Suhbatni davom ettiruvchi savol bilan yakunla.";
+
+  let lastAIText = '';
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){
+    unsupportedBox.style.display = 'block';
+    speakWrap.style.display = 'none';
+  } else {
+    const recognition = new SR();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    let listening = false;
+
+    function setPlaceholderGone(){
+      const ph = transcriptBox.querySelector('.placeholder');
+      if(ph) ph.remove();
+    }
+
+    function addLine(who, text){
+      setPlaceholderGone();
+      const wrap = document.createElement('div');
+      wrap.className = 'line';
+      const label = who==='you' ? 'SIZ' : 'AI TEACHER';
+      wrap.innerHTML = '<div class="who '+who+'">'+label+'</div><div class="text"></div>';
+      wrap.querySelector('.text').textContent = text;
+      transcriptBox.appendChild(wrap);
+      transcriptBox.scrollTop = transcriptBox.scrollHeight;
+    }
+
+    function speak(text){
+      if(!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US';
+      u.rate = 0.95;
+      window.speechSynthesis.speak(u);
+    }
+
+    micBtn.addEventListener('click', ()=>{
+      if(listening){ recognition.stop(); return; }
+      try{ recognition.start(); }catch(e){}
+    });
+
+    recognition.addEventListener('start', ()=>{
+      listening = true;
+      micBtn.classList.add('listening');
+      micStatus.textContent = "Tinglanmoqda... gapiring";
+    });
+
+    recognition.addEventListener('end', ()=>{
+      listening = false;
+      micBtn.classList.remove('listening');
+      micStatus.textContent = "Gapirish uchun mikrofonni bosing";
+    });
+
+    recognition.addEventListener('error', (e)=>{
+      listening = false;
+      micBtn.classList.remove('listening');
+      micStatus.textContent = "Xatolik: mikrofonga ruxsat berilganini tekshiring";
+    });
+
+    recognition.addEventListener('result', async (e)=>{
+      const heard = e.results[0][0].transcript;
+      addLine('you', heard);
+      micStatus.textContent = "AI javob tayyorlamoqda...";
+      try{
+        const reply = await askAI(SPEAK_SYSTEM, heard);
+        lastAIText = reply;
+        addLine('ai', reply);
+        speak(reply);
+        micStatus.textContent = "Gapirish uchun mikrofonni bosing";
+      }catch(err){
+        addLine('ai', "Sorry, connection error. Please try again.");
+        micStatus.textContent = "Gapirish uchun mikrofonni bosing";
+      }
+    });
+
+    replayBtn.addEventListener('click', ()=>{ if(lastAIText) speak(lastAIText); });
+    clearBtn.addEventListener('click', ()=>{
+      transcriptBox.innerHTML = '<p class="placeholder">Suhbat shu yerda ko\'rinadi...</p>';
+      lastAIText = '';
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

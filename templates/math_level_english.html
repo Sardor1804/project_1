@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Google Fonts: Outfit -->
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --accent-red: #ff0055;
+        --accent-blue: #00d2ff;
+        --accent-purple: #7000ff;
+        --bg-dark: #0a0a0f;
+        --card-bg: rgba(255, 255, 255, 0.03);
+    }
+
+    .subject-page {
+        min-height: 100vh;
+        background: var(--bg-dark);
+        font-family: 'Outfit', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 20px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    #bg-canvas {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: 0;
+        opacity: 0.4;
+    }
+
+    .header-section {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        margin-bottom: 80px;
+    }
+
+    .header-section h2 {
+        font-weight: 800;
+        font-size: clamp(2.5rem, 8vw, 5rem);
+        margin: 0;
+        background: linear-gradient(to bottom, #fff 30%, #94a3b8);
+        -webkit-text-fill-color: transparent;
+        text-transform: uppercase;
+        letter-spacing: 12px;
+        filter: drop-shadow(0 0 20px rgba(112, 0, 255, 0.3));
+    }
+
+    .sub-title-text {
+        color: #64748b;
+        font-size: 1.1rem;
+        letter-spacing: 4px;
+        margin-top: 15px;
+        font-weight: 300;
+        text-transform: uppercase;
+    }
+
+    .cards-wrapper {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 30px;
+        width: 100%;
+        max-width: 1100px;
+    }
+
+    .level-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 35px;
+        padding: 50px 40px;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .level-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: radial-gradient(circle at top right, rgba(112, 0, 255, 0.05), transparent);
+        pointer-events: none;
+    }
+
+    .level-card:hover {
+        transform: translateY(-12px);
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+    }
+
+    .icon-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 25px;
+        transition: 0.4s;
+    }
+
+    .level-card:hover .icon-wrapper {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .level-card h3 {
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .level-card p {
+        color: #94a3b8;
+        line-height: 1.6;
+        font-size: 1rem;
+        font-weight: 300;
+        height: 50px;
+        margin-bottom: 30px;
+    }
+
+    .btn-action {
+        display: block;
+        padding: 16px;
+        border-radius: 18px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-decoration: none !important;
+        color: white !important;
+        transition: 0.3s;
+        border: none;
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-easy { background: linear-gradient(135deg, #00f2ff, #00d2ff); box-shadow: 0 10px 20px rgba(0, 210, 255, 0.2); }
+    .btn-normal { background: linear-gradient(135deg, #7000ff, #ff00c8); box-shadow: 0 10px 20px rgba(112, 0, 255, 0.2); }
+    .btn-hard { background: linear-gradient(135deg, #ff0055, #ff5e00); box-shadow: 0 10px 20px rgba(255, 0, 85, 0.2); }
+
+    .btn-action:hover {
+        transform: scale(1.02);
+        filter: brightness(1.1);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .icon-color-easy { color: var(--accent-blue); }
+    .icon-color-normal { color: var(--accent-purple); }
+    .icon-color-hard { color: var(--accent-red); }
+</style>
+
+<div class="subject-page">
+    <canvas id="bg-canvas"></canvas>
+
+    <h2 style="text-align: center; font-size: 8ex;">Mathematics</h2>
+    <br>
+
+    <div class="header-section">
+        <p class="sub-title-text">Choose a level and test your logic</p>
+    </div>
+
+    <div class="cards-wrapper">
+
+        <!-- EASY -->
+        <div class="level-card">
+            <div class="icon-wrapper icon-color-easy">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="60">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147L12 14.654l7.74-4.507m-15.48 0a1.012 1.012 0 010-1.751l7.74-4.507a1.012 1.012 0 011.02 0l7.74 4.507a1.012 1.012 0 010 1.751m-15.48 0L12 14.654l7.74-4.507M9.343 15.514A10.018 10.018 0 0112 16c2.731 0 5.141-1.093 6.903-2.868M9.343 15.514L12 14.654l2.657.86m-5.314 0a10.02 10.02 0 00-1.606 2.308c-.333.666-.333 1.333 0 2.001a4.499 4.499 0 008.245 0c.333-.668.333-1.335 0-2.001a10.02 10.02 0 00-1.606-2.308" />
+                </svg>
+            </div>
+            <h3>Easy</h3>
+            <p>Basic knowledge and simple operations.</p>
+            <a href="{% url 'subjects:math_easy_english' %}" class="btn-action btn-easy">Start</a>
+        </div>
+
+        <!-- MEDIUM -->
+        <div class="level-card">
+            <div class="icon-wrapper icon-color-normal">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="60">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                </svg>
+            </div>
+            <h3>Medium</h3>
+            <p>Logical thinking and fast calculations.</p>
+            <a href="{% url 'subjects:math_normal_english' %}" class="btn-action btn-normal">Start</a>
+        </div>
+
+        <!-- HARD -->
+        <div class="level-card">
+            <div class="icon-wrapper icon-color-hard">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="60">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1A3.75 3.75 0 0012 18z" />
+                </svg>
+            </div>
+            <h3>Hard</h3>
+            <p>Complex functions and olympiad problems.</p>
+            <a href="{% url 'subjects:math_hard_english' %}" class="btn-action btn-hard">Start</a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resize() { 
+        canvas.width = window.innerWidth; 
+        canvas.height = window.innerHeight; 
+    }
+    
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+        constructor() {
+            this.init();
+        }
+        init() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 1.5 + 0.5;
+            this.speedX = Math.random() * 0.5 - 0.25;
+            this.speedY = Math.random() * 0.5 - 0.25;
+            this.alpha = Math.random() * 0.5;
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            if (this.x > canvas.width || this.x < 0 || this.y > canvas.height || this.y < 0) {
+                this.init();
+            }
+        }
+        draw() {
+            ctx.fillStyle = `rgba(112, 0, 255, ${this.alpha})`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    for(let i = 0; i < 80; i++) particles.push(new Particle());
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        requestAnimationFrame(animate);
+    }
+    animate();
+</script>
+
+{% endblock %}

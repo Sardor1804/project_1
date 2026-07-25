@@ -1,0 +1,459 @@
+{% include "navbar.html" %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subjects & Tests</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
+    <svg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'>
+      <defs>
+        <linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'>
+          <stop offset='0%25' stop-color='%2300f2ff'/>
+          <stop offset='50%25' stop-color='%237000ff'/>
+          <stop offset='100%25' stop-color='%23ff00c8'/>
+        </linearGradient>
+        <filter id='f' x='-20%25' y='-20%25' width='140%25' height='140%25'>
+          <feGaussianBlur in='SourceAlpha' stdDeviation='3'/>
+          <feOffset dx='0' dy='4' result='offsetblur'/>
+          <feComponentTransfer><feFuncA type='linear' slope='0.5'/></feComponentTransfer>
+          <feMerge><feMergeNode/><feMergeNode in='SourceGraphic'/></feMerge>
+        </filter>
+      </defs>
+      <rect width='128' height='128' rx='32' fill='%230f0f12'/>
+      <circle cx='64' cy='64' r='42' fill='url(%23g)' opacity='0.15'/>
+      <circle cx='64' cy='64' r='36' fill='url(%23g)' filter='url(%23f)'/>
+      <text x='50%25' y='52%25' font-size='42' fill='white' font-family='Segoe UI, Roboto, Helvetica, sans-serif'
+            text-anchor='middle' dominant-baseline='middle' font-weight='900'>M</text>
+    </svg>">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0f172a;
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* MAIN CONTAINER */
+        .main-wrapper {
+            padding-top: 120px;
+            padding-bottom: 60px;
+        }
+
+        /* TITLES */
+        .main-title {
+            text-align: center;
+            font-size: 2.4rem;
+            font-weight: 800;
+            margin-bottom: 50px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 35px;
+        }
+
+        /* SEARCH */
+        .test-search-wrap {
+            max-width: 520px;
+            margin: 0 auto 30px;
+        }
+
+        .test-search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 12px 18px;
+            transition: 0.3s ease;
+        }
+
+        .test-search-box:focus-within {
+            border-color: rgba(0, 210, 255, 0.45);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.1);
+        }
+
+        .test-search-box svg {
+            color: #00d2ff;
+            flex-shrink: 0;
+        }
+
+        .test-search-box input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #f8fafc;
+            font-size: 15px;
+            width: 100%;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .test-search-box input::placeholder {
+            color: #475569;
+        }
+
+        #searchEmpty {
+            display: none;
+            text-align: center;
+            padding: 60px 20px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            color: #64748b;
+            margin-top: 10px;
+        }
+
+        /* CARD */
+        .custom-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 22px;
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(12px);
+            transition: 0.4s ease;
+        }
+
+        .custom-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(0, 210, 255, 0.4);
+            box-shadow:
+                0 15px 35px rgba(0, 0, 0, 0.45),
+                0 0 20px rgba(0, 210, 255, 0.15);
+        }
+
+        /* IMAGE */
+        .card-img-container {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            overflow: hidden;
+            background: #1e293b;
+        }
+
+        .card-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: 0.5s ease;
+        }
+
+        .custom-card:hover img {
+            transform: scale(1.1);
+        }
+
+        /* BADGE */
+        .level-badge {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            padding: 6px 14px;
+            border-radius: 100px;
+            background: rgba(0, 210, 255, 0.15);
+            border: 1px solid rgba(0, 210, 255, 0.35);
+            color: #00d2ff;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            backdrop-filter: blur(5px);
+        }
+
+        /* CONTENT */
+        .card-content {
+            padding: 22px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+        }
+
+        .card-content h6 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #f8fafc;
+        }
+
+        .card-content p {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 18px;
+        }
+
+        /* BUTTON */
+        .btn-start {
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 12px;
+            border-radius: 14px;
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            transition: 0.3s ease;
+            border: none;
+        }
+
+        .btn-start:hover {
+            color: white;
+            transform: scale(1.03);
+            box-shadow: 0 0 25px rgba(0, 210, 255, 0.35);
+        }
+
+        /* HR */
+        hr {
+            border-color: rgba(255, 255, 255, 0.08);
+            margin: 70px 0;
+        }
+
+        /* EMPTY */
+        .empty-box {
+            text-align: center;
+            padding: 60px 20px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        /* ====================== */
+        /* TABLET */
+        /* ====================== */
+        @media (max-width: 992px) {
+            .main-title { font-size: 2rem; }
+            .section-title { font-size: 1.7rem; }
+            .card-img-container { height: 190px; }
+            .card-content { padding: 18px; }
+            .card-content h6 { font-size: 1.05rem; }
+        }
+
+        /* ====================== */
+        /* MOBILE */
+        /* ====================== */
+        @media (max-width: 768px) {
+            .main-wrapper {
+                padding-top: 100px;
+                padding-bottom: 40px;
+            }
+            .main-title {
+                font-size: 1.7rem;
+                margin-bottom: 30px;
+            }
+            .section-title {
+                font-size: 1.5rem;
+                margin-bottom: 25px;
+            }
+            .custom-card { border-radius: 18px; }
+            .card-img-container { height: 170px; }
+            .card-content { padding: 16px; }
+            .card-content h6 { font-size: 1rem; }
+            .card-content p { font-size: 13px; }
+            .btn-start {
+                padding: 10px;
+                font-size: 13px;
+                border-radius: 12px;
+            }
+            .level-badge {
+                font-size: 9px;
+                padding: 5px 10px;
+            }
+            hr { margin: 45px 0; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container main-wrapper">
+
+    <!-- ===== SUBJECTS SECTION ===== -->
+    <h1 style="text-align:center; font-family:sans-serif;">
+        <span style="display:inline-flex; align-items:center; gap:10px; justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                 stroke-width="1.5" stroke="currentColor" width="32" height="32">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M4.26 10.147L12 14.63l7.74-4.483m-15.48 0L12 5.667l7.74 4.48m-15.48 0v4.331c0 .605.348 1.157.9 1.432l6.84 3.42a1.25 1.25 0 001.08 0l6.84-3.42c.552-.275.9-.827.9-1.432v-4.331"/>
+            </svg>
+            Subjects Section
+        </span>
+    </h1>
+    <br><br>
+
+    <div class="row g-4">
+
+        <!-- MATHEMATICS -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="custom-card">
+                <div class="card-img-container">
+                    <img src="https://images.unsplash.com/photo-1509228627152-72ae9ae6848d" alt="Mathematics">
+                </div>
+                <div class="card-content">
+                    <div>
+                        <h6>Mathematics</h6>
+                        <p>Develop your thinking and solve logical problems.</p>
+                    </div>
+                    <a href="{% url 'subjects:math_level_english' %}" class="btn-start">
+                        Enter <i class="bi bi-arrow-right-short"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- PHYSICS -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="custom-card">
+                <div class="card-img-container">
+                    <img src="https://img.freepik.com/premium-vector/physics-formulas-science-education-background-chalkboard-inscribed-with-scientific-formulas_93083-5592.jpg" alt="Physics">
+                </div>
+                <div class="card-content">
+                    <div>
+                        <h6>Physics</h6>
+                        <p>Explore the laws of the universe and nature with us.</p>
+                    </div>
+                    <a href="{% url 'subjects:physics_level_english' %}" class="btn-start">
+                        Enter <i class="bi bi-arrow-right-short"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMPUTER SCIENCE -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="custom-card">
+                <div class="card-img-container">
+                    <img src="https://img.freepik.com/premium-photo/it-information-technology-wallpaper-hd-4k_7419-4547.jpg" alt="Computer Science">
+                </div>
+                <div class="card-content">
+                    <div>
+                        <h6>Computer Science</h6>
+                        <p>Journey into the world of algorithms and programming.</p>
+                    </div>
+                    <a href="{% url 'subjects:informatics_level_english' %}" class="btn-start">
+                        Enter <i class="bi bi-arrow-right-short"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <hr>
+
+    <!-- ===== TESTS SECTION ===== -->
+    <h2 class="section-title" style="display:flex; align-items:center; justify-content:center; gap:8px; font-family:sans-serif;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="26" height="26">
+            <path fill-rule="evenodd"
+                  d="M8.603 3.799A4.478 4.478 0 0 1 12.381 2c1.418 0 2.716.656 3.555 1.76a4.477 4.477 0 0 1 3.528 3.528c1.104.84 1.76 2.137 1.76 3.555 0 1.418-.656 2.716-1.76 3.555a4.477 4.477 0 0 1-3.528 3.528c-.84 1.104-2.137 1.76-3.555 1.76a4.478 4.478 0 0 1-3.778-1.799 4.478 4.478 0 0 1-3.528-3.528C3.656 16.031 3 14.734 3 13.316c0-1.418.656-2.716 1.76-3.555a4.477 4.477 0 0 1 3.528-3.528ZM16.035 10.53a.75.75 0 0 0-1.07-1.06l-3.215 3.215-1.215-1.215a.75.75 0 1 0-1.06 1.06l1.745 1.745a.75.75 0 0 0 1.06 0l3.745-3.745Z"
+                  clip-rule="evenodd"/>
+        </svg>
+        Available Tests
+    </h2>
+
+    <!-- SEARCH BOX -->
+    <div class="test-search-wrap">
+        <div class="test-search-box">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                 stroke-width="2" stroke="currentColor" width="18" height="18">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="m21 21-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+            </svg>
+            <input type="text" id="testSearch"
+                   placeholder="Search by test name or title...">
+        </div>
+    </div>
+
+    <!-- TEST CARDS -->
+    <div class="row g-4" id="testCardsRow">
+
+        {% for test in tests %}
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 test-card-col"
+             data-title="{{ test.title|lower }}">
+            <div class="custom-card">
+                <div class="card-img-container">
+                    {% if test.image %}
+                        <img src="{{ test.image.url }}" alt="{{ test.title }}">
+                    {% else %}
+                        <div class="h-100 d-flex align-items-center justify-content-center bg-dark text-muted small">
+                            <i class="bi bi-card-image fs-1 opacity-25"></i>
+                        </div>
+                    {% endif %}
+                    <span class="level-badge">{{ test.level|capfirst }}</span>
+                </div>
+                <div class="card-content">
+                    <div>
+                        <h6>{{ test.title|truncatechars:30 }}</h6>
+                        <p>Test your knowledge</p>
+                    </div>
+                    <a href="{% url 'subjects:test_detail' test.id %}" class="btn-start">
+                        Start <i class="bi bi-play-circle-fill"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12" id="noTestsDefault">
+            <div class="empty-box">
+                <i class="bi bi-search fs-1 opacity-25 d-block mb-3"></i>
+                <p class="text-muted mb-0">No tests found yet.</p>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <!-- Search no results -->
+    <div id="searchEmpty">
+        <i class="bi bi-search fs-1 opacity-25 d-block mb-3"></i>
+        <p class="mb-0">No tests found.</p>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    const searchInput = document.getElementById('testSearch');
+    const searchEmpty = document.getElementById('searchEmpty');
+    const testCols = document.querySelectorAll('.test-card-col');
+
+    searchInput.addEventListener('input', function () {
+        const query = this.value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        testCols.forEach(function (col) {
+            const title = col.dataset.title || '';
+            const isMatch = !query || title.includes(query);
+            col.style.display = isMatch ? '' : 'none';
+            if (isMatch) visibleCount++;
+        });
+
+        searchEmpty.style.display = (visibleCount === 0 && query !== '') ? 'block' : 'none';
+    });
+</script>
+
+</body>
+</html>

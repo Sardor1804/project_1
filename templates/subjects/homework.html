@@ -1,0 +1,179 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vazifalar Nazorati | Teacher Panel</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        body { background: #0f172a; color: #f1f5f9; font-family: 'Poppins', sans-serif; }
+        .container { max-width: 1000px; margin-top: 40px; }
+        
+        /* Glassmorphism Panel */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .teacher-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(0, 210, 255, 0.2);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .status-badge {
+            background: rgba(0, 210, 255, 0.15);
+            color: #00d2ff;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(0, 210, 255, 0.3);
+        }
+
+        /* Jadval dizayni */
+        .homework-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 12px;
+        }
+        .homework-table thead th {
+            color: #94a3b8;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            padding: 10px 20px;
+            border: none;
+        }
+        .homework-table tbody tr {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        .homework-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.07);
+            transform: scale(1.01);
+        }
+        .homework-table td {
+            padding: 20px;
+            border: none;
+        }
+        .homework-table td:first-child { border-radius: 15px 0 0 15px; }
+        .homework-table td:last-child { border-radius: 0 15px 15px 0; }
+
+        .student-name { font-weight: 600; color: #fff; display: flex; align-items: center; gap: 10px; }
+        .student-initial { 
+            width: 35px; height: 35px; background: #334155; 
+            border-radius: 10px; display: flex; align-items: center; 
+            justify-content: center; color: #00d2ff; 
+        }
+
+        .answer-bubble {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 8px 15px;
+            border-radius: 10px;
+            border-left: 3px solid #3a7bd5;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+        }
+
+        .btn-back {
+            text-decoration: none;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .btn-back:hover { color: #00d2ff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="{% url 'subjects:science_view' %}" class="btn-back d-inline-block mb-4">
+        <i class="bi bi-chevron-left"></i> Fanlar bo'limiga qaytish
+    </a>
+
+    <div class="glass-panel">
+        {% if is_teacher %}
+            <!-- O'QITUVCHI KO'RINISHI -->
+            <div class="teacher-header">
+                <div>
+                    <h2 class="fw-bold m-0 text-white">Topshirilgan Vazifalar</h2>
+                    <p class="text-muted m-0 small">Barcha o'quvchilar javoblari ro'yxati</p>
+                </div>
+                <span class="status-badge"><i class="bi bi-person-badge-fill me-2"></i>Teacher Mode</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="homework-table">
+                    <thead>
+                        <tr>
+                            <th>O'quvchi</th>
+                            <th>Mavzu / Test</th>
+                            <th>Yuborilgan Javob</th>
+                            <th>Vaqt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for res in results %}
+                        <tr>
+                            <td>
+                                <div class="student-name">
+                                    <div class="student-initial">{{ res.user.username|slice:":1"|upper }}</div>
+                                    {{ res.user.username }}
+                                </div>
+                            </td>
+                            <td class="text-info fw-medium">{{ res.test.title }}</td>
+                            <td>
+                                <div class="answer-bubble">
+                                    {{ res.submitted_answer }}
+                                </div>
+                            </td>
+                            <td class="text-muted small">
+                                {{ res.created_at|date:"d-M, H:i" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5">
+                                <div class="opacity-25 mb-3"><i class="bi bi-folder2-open fs-1"></i></div>
+                                <p class="text-muted">Hozircha hech qanday vazifa yuborilmagan.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        {% else %}
+            <!-- O'QUVCHI UCHUN TASDIQ -->
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="bi bi-cloud-check-fill text-success" style="font-size: 5rem;"></i>
+                </div>
+                <h2 class="fw-bold text-white">Muvaffaqiyatli yuborildi!</h2>
+                <p class="text-muted px-lg-5">Sizning javoblaringiz bazaga saqlandi. O'qituvchi ularni ko'rib chiqqanidan so'ng natijangizni e'lon qiladi.</p>
+                <div class="mt-4">
+                    <a href="{% url 'subjects:science_view' %}" class="btn btn-primary px-5 py-3 rounded-pill fw-bold border-0 shadow" style="background: linear-gradient(45deg, #00d2ff, #3a7bd5);">
+                        Keyingi darsga o'tish <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

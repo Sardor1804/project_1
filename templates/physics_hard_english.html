@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Physics Hard | Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'><rect width='128' height='128' rx='32' fill='%230f0f12'/><circle cx='64' cy='64' r='36' fill='%237000ff' opacity='0.3'/><text x='50%25' y='52%25' font-size='42' fill='white' font-family='Segoe UI' text-anchor='middle' dominant-baseline='middle' font-weight='900'>M</text></svg>">
+<style>
+:root {
+  --neon:       #7c3aed;
+  --neon2:      #06b6d4;
+  --neon-deep:  #4c1d95;
+  --neon-soft:  rgba(124,58,237,0.12);
+  --neon-brd:   rgba(124,58,237,0.35);
+  --neon-glow:  rgba(124,58,237,0.25);
+  --cyan-soft:  rgba(6,182,212,0.10);
+  --cyan-brd:   rgba(6,182,212,0.32);
+  --danger:        #ef4444;
+  --danger-soft:   rgba(239,68,68,0.10);
+  --danger-brd:    rgba(239,68,68,0.32);
+  --danger-glow:   rgba(239,68,68,0.20);
+  --bg:    #08080a;
+  --bg2:   #0f0e17;
+  --bg3:   #13121e;
+  --bg4:   #1a1826;
+  --card:  rgba(255,255,255,0.03);
+  --line:  rgba(255,255,255,0.07);
+  --text:  #ede9fe;
+  --tsec:  #9d94c0;
+  --tmut:  #5d566e;
+  --r:     14px;
+  --rlg:   20px;
+  --rxl:   26px;
+  --shadow: 0 20px 48px rgba(0,0,0,0.6);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+body {
+  background: var(--bg);
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(124,58,237,0.14) 0%, transparent 55%),
+    linear-gradient(rgba(124,58,237,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px);
+  background-size: auto, 40px 40px, 40px 40px;
+  color: var(--text);
+  font-family: 'Montserrat', sans-serif;
+  min-height: 100vh;
+  padding-bottom: 64px;
+}
+
+/* --- BANNER --- */
+#banner {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  background: linear-gradient(90deg, var(--neon), var(--neon2));
+  color: #fff;
+  text-align: center;
+  padding: 10px 20px;
+  font-weight: 700;
+  font-size: 0.87rem;
+  z-index: 99999;
+}
+
+/* --- WARN OVERLAY --- */
+#warnOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.82);
+  z-index: 88888;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+}
+#warnOverlay.show { display: flex; }
+
+.warn-box {
+  background: var(--bg3);
+  border: 1.5px solid var(--danger-brd);
+  border-radius: var(--rxl);
+  padding: 42px 34px;
+  text-align: center;
+  max-width: 430px;
+  width: 92%;
+  box-shadow: 0 0 60px var(--danger-glow), var(--shadow);
+}
+.warn-icon  { font-size: 2.8rem; margin-bottom: 14px; }
+.warn-title { font-size: 1.15rem; font-weight: 800; color: var(--danger); font-family: 'Orbitron', sans-serif; margin-bottom: 10px; }
+.warn-text  { color: var(--tsec); font-size: 0.93rem; line-height: 1.8; margin-bottom: 26px; }
+.warn-btn {
+  background: linear-gradient(135deg, var(--danger), #f97316);
+  border: none; color: #fff;
+  padding: 13px 34px; border-radius: var(--r);
+  font-weight: 700; font-size: 0.93rem;
+  cursor: pointer; font-family: inherit;
+}
+.warn-btn:hover { opacity: 0.88; }
+
+/* --- NAVBAR --- */
+.site-navbar {
+  background: rgba(8,8,10,0.95);
+  border-bottom: 1px solid rgba(124,58,237,0.20);
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 58px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(20px);
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Orbitron', sans-serif; font-size: 0.9rem; font-weight: 700;
+  color: var(--neon); text-decoration: none; letter-spacing: 1.5px;
+}
+.brand-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--neon), var(--neon2));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; font-weight: 900; color: #fff;
+}
+.nav-links { display: flex; align-items: center; gap: 8px; list-style: none; }
+.nav-links a {
+  color: var(--tsec); text-decoration: none;
+  font-size: 0.84rem; font-weight: 600;
+  padding: 8px 20px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--neon), var(--neon2));
+  color: #fff;
+}
+.nav-links a:hover { opacity: 0.85; }
+
+/* --- QUIZ HEADER --- */
+.quiz-header {
+  background: rgba(8,8,10,0.92);
+  border-bottom: 1px solid rgba(124,58,237,0.18);
+  padding: 11px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 58px; z-index: 999;
+  backdrop-filter: blur(20px);
+  margin-bottom: 32px;
+}
+.quiz-title {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Orbitron', sans-serif; font-size: 0.85rem; font-weight: 700;
+  color: var(--neon); letter-spacing: 1px;
+}
+.quiz-meta { font-size: 0.73rem; font-weight: 500; color: var(--tmut); margin-left: 4px; }
+
+.timer-box {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.1rem; font-weight: 700; color: var(--neon2);
+  background: var(--cyan-soft); border: 1px solid var(--cyan-brd);
+  padding: 7px 22px; border-radius: 50px;
+  letter-spacing: 3px; min-width: 100px; text-align: center;
+  box-shadow: 0 0 12px rgba(6,182,212,0.25);
+  transition: all 0.3s;
+}
+.timer-box.danger {
+  color: var(--danger) !important;
+  background: var(--danger-soft); border-color: var(--danger-brd);
+  box-shadow: 0 0 15px rgba(239,68,68,0.4);
+  animation: pulse 0.8s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.45}}
+
+/* --- LAYOUT --- */
+.container { max-width: 720px; margin: 0 auto; padding: 0 20px; }
+
+/* --- CARD --- */
+.card-box {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(124,58,237,0.18);
+  border-radius: var(--rxl);
+  padding: 38px 34px;
+  box-shadow: var(--shadow), 0 0 60px rgba(124,58,237,0.06);
+  backdrop-filter: blur(18px);
+}
+
+/* --- INFO PILL --- */
+.info-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--neon-soft); color: var(--neon);
+  padding: 6px 16px; border-radius: 8px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px;
+  border: 1px solid var(--neon-brd); margin-bottom: 24px;
+}
+.info-pill::before {
+  content: ''; width: 6px; height: 6px;
+  background: var(--neon); border-radius: 50%;
+  animation: blink 1.4s infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* --- WARN STRIP --- */
+.warn-strip {
+  display: none;
+  background: var(--danger-soft); border: 1px solid var(--danger-brd);
+  border-radius: 11px; padding: 11px 18px; margin-bottom: 22px;
+  font-size: 0.84rem; color: var(--danger); text-align: center; font-weight: 600;
+}
+.warn-strip.show { display: block; }
+
+/* --- QUESTIONS --- */
+.question-wrapper {
+  background: var(--bg4);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--neon-deep);
+  border-radius: var(--rlg);
+  padding: 22px 20px;
+  margin-bottom: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.question-wrapper:hover {
+  border-color: var(--neon-brd);
+  border-left-color: var(--neon);
+  box-shadow: 0 0 0 3px var(--neon-glow);
+}
+.q-title {
+  font-size: 1rem; font-weight: 700; color: var(--text);
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.q-num {
+  font-family: 'Orbitron', sans-serif; font-size: 0.75rem; font-weight: 700;
+  color: var(--neon2); background: var(--cyan-soft);
+  border: 1px solid var(--cyan-brd);
+  padding: 3px 10px; border-radius: 6px; flex-shrink: 0;
+}
+
+/* --- OPTIONS --- */
+.option-container {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; margin-bottom: 8px;
+  cursor: pointer; font-size: 0.94rem; color: var(--tsec);
+  background: rgba(255,255,255,0.025);
+  border-radius: var(--r); border: 1px solid transparent;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+  user-select: none; position: relative;
+}
+.option-container:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+.option-container input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+.radio-dot {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.22); flex-shrink: 0;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.radio-dot::after {
+  content: ''; width: 8px; height: 8px;
+  background: #fff; border-radius: 50%;
+  opacity: 0; transform: scale(0.4); transition: opacity 0.2s, transform 0.2s;
+}
+.option-container input:checked ~ .radio-dot {
+  background: var(--neon); border-color: var(--neon);
+  box-shadow: 0 0 10px var(--neon-glow);
+}
+.option-container input:checked ~ .radio-dot::after { opacity: 1; transform: scale(1); }
+.option-container:has(input:checked) {
+  background: var(--neon-soft); border-color: var(--neon-brd); color: var(--text);
+}
+.option-letter {
+  font-family: 'Orbitron', sans-serif; font-size: 0.72rem; font-weight: 700;
+  color: var(--tmut); min-width: 18px;
+}
+.option-container:has(input:checked) .option-letter { color: var(--neon); }
+
+/* --- SUBMIT --- */
+.divider { height: 1px; background: linear-gradient(90deg, transparent, var(--line), transparent); margin: 24px 0; }
+.btn-finish {
+  width: 100%;
+  background: linear-gradient(135deg, var(--neon), var(--neon2));
+  border: none; color: #fff;
+  padding: 17px; border-radius: var(--r);
+  font-family: 'Orbitron', sans-serif; font-size: 0.85rem; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  cursor: pointer; margin-top: 6px;
+  box-shadow: 0 8px 28px var(--neon-glow);
+  transition: opacity 0.2s, transform 0.18s;
+}
+.btn-finish:hover { opacity: 0.9; transform: translateY(-2px); }
+.btn-finish:active { transform: translateY(0); }
+
+/* --- RESULT --- */
+#resultScreen { display: none; text-align: center; padding: 10px 0; }
+.score-circle {
+  width: 150px; height: 150px; border-radius: 50%;
+  border: 3px solid var(--neon);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+  box-shadow: 0 0 0 8px var(--neon-soft), 0 0 50px var(--neon-glow);
+  background: var(--bg4);
+}
+.score-num { font-family: 'Orbitron', sans-serif; font-size: 2.6rem; font-weight: 900; color: var(--neon); line-height: 1; }
+.score-pct { font-size: 0.74rem; color: var(--tmut); margin-top: 6px; font-family: 'Orbitron', sans-serif; }
+.result-emoji { font-size: 2rem; margin-bottom: 8px; }
+.result-title { font-size: 1.2rem; font-weight: 800; font-family: 'Orbitron', sans-serif; color: var(--text); margin-bottom: 16px; }
+.reason-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 18px; border-radius: 10px;
+  font-size: 0.83rem; font-weight: 600; margin-bottom: 26px;
+}
+.reason-badge.good { background: var(--neon-soft); border: 1px solid var(--neon-brd); color: var(--neon); }
+.reason-badge.bad  { background: var(--danger-soft); border: 1px solid var(--danger-brd); color: var(--danger); }
+.stats-grid { max-width: 380px; margin: 0 auto 28px; }
+.result-stat {
+  background: var(--bg4); border: 1px solid var(--line); border-radius: 12px;
+  padding: 12px 20px; margin-bottom: 8px;
+  display: flex; justify-content: space-between; align-items: center; font-size: 0.92rem;
+}
+.result-stat .rl { color: var(--tsec); }
+.result-stat .rv { color: var(--neon2); font-weight: 700; font-family: 'Orbitron', sans-serif; }
+.result-stat .rv.bad { color: var(--danger); }
+.btn-home {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: transparent; border: 1.5px solid var(--neon-brd);
+  color: var(--neon); padding: 13px 32px; border-radius: var(--r);
+  font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.8rem;
+  letter-spacing: 1px; text-transform: uppercase; text-decoration: none; cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-home:hover { background: var(--neon-soft); box-shadow: 0 0 22px var(--neon-glow); color: var(--neon); }
+
+@media(max-width:600px){
+  .card-box{padding:22px 16px;border-radius:var(--rlg)}
+  .quiz-header{padding:10px 16px}
+  .site-navbar{padding:0 16px}
+  .brand span{display:none}
+  .quiz-meta{display:none}
+}
+</style>
+<script>var HOME_URL = "{% url 'home' %}";</script>
+</head>
+<body>
+
+<!-- BANNER -->
+<div id="banner"></div>
+
+<!-- WARN OVERLAY -->
+<div id="warnOverlay">
+  <div class="warn-box">
+    <div class="warn-icon">⚠️</div>
+    <div class="warn-title">Sahifa yangilandi!</div>
+    <div class="warn-text" id="warnText"></div>
+    <button class="warn-btn" id="warnOkBtn">✓ &nbsp;Tushundim, davom etaman</button>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="site-navbar">
+  <a href="{% url 'home' %}" class="brand">
+    <div class="brand-icon">M</div>
+    <span>QUANTUM LAB</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="{% url 'login' %}">Kirish</a></li>
+  </ul>
+</nav>
+
+<!-- STICKY QUIZ HEADER -->
+<div class="quiz-header">
+  <div class="quiz-title">
+    ⬡ PHYSICS HARD
+    <span class="quiz-meta">· Hard · 5 savol · 2 daqiqa</span>
+  </div>
+  <div id="timer" class="timer-box">02:00</div>
+</div>
+
+<!-- BODY -->
+<div class="container mb-5">
+  <div class="card-box">
+
+    <div id="quizContent">
+      <div class="info-pill">DARAJA: HARD &nbsp;·&nbsp; 5 SAVOL &nbsp;·&nbsp; 2 DAQIQA</div>
+
+      <div class="warn-strip" id="warnStrip">
+        ⚠️ <strong>Oxirgi ogohlantirish!</strong> Yana yangilasangiz test <strong>avtomatik tugaydi!</strong>
+      </div>
+
+      <form method="POST" action="{% url 'finish_test' %}" id="quizForm">
+        {% csrf_token %}
+
+        <!-- Q1 -->
+        <div class="question-wrapper">
+          <div class="q-title"><span class="q-num">01</span> Schrödinger tenglamasi kvant mexanikasida nimani aniqlaydi?</div>
+          <label class="option-container">
+            <input type="radio" name="q1" value="1">
+            <span class="radio-dot"></span>
+            <span class="option-letter">A)</span>
+            To'lqin funksiyasining evolyutsiyasi
+          </label>
+          <label class="option-container">
+            <input type="radio" name="q1" value="0">
+            <span class="radio-dot"></span>
+            <span class="option-letter">B)</span>
+            Fotonning massasi
+          </label>
+        </div>
+
+        <!-- Q2 -->
+        <div class="question-wrapper">
+          <div class="q-title"><span class="q-num">02</span> Eynshteynning massa–energiya ekvivalentligi formulasi:</div>
+          <label class="option-container">
+            <input type="radio" name="q2" value="1">
+            <span class="radio-dot"></span>
+            <span class="option-letter">A)</span>
+            E = mc²
+          </label>
+          <label class="option-container">
+            <input type="radio" name="q2" value="0">
+            <span class="radio-dot"></span>
+            <span class="option-letter">B)</span>
+            E = mv²/2
+          </label>
+        </div>
+
+        <!-- Q3 -->
+        <div class="question-wrapper">
+          <div class="q-title"><span class="q-num">03</span> Fotoeffektni tushuntirgan olim Nobel mukofotini oldi?</div>
+          <label class="option-container">
+            <input type="radio" name="q3" value="1">
+            <span class="radio-dot"></span>
+            <span class="option-letter">A)</span>
+            Albert Eynshteyn
+          </label>
+          <label class="option-container">
+            <input type="radio" name="q3" value="0">
+            <span class="radio-dot"></span>
+            <span class="option-letter">B)</span>
+            Niels Bor
+          </label>
+        </div>
+
+        <!-- Q4 -->
+        <div class="question-wrapper">
+          <div class="q-title"><span class="q-num">04</span> Entropisiya qaysi qonun bilan bog'liq?</div>
+          <label class="option-container">
+            <input type="radio" name="q4" value="1">
+            <span class="radio-dot"></span>
+            <span class="option-letter">A)</span>
+            Termodinamikaning 2-qonuni
+          </label>
+          <label class="option-container">
+            <input type="radio" name="q4" value="0">
+            <span class="radio-dot"></span>
+            <span class="option-letter">B)</span>
+            Kulon qonuni
+          </label>
+        </div>
+
+        <!-- Q5 -->
+        <div class="question-wrapper">
+          <div class="q-title"><span class="q-num">05</span> Vakuumdagi yorug'lik tezligi (c) qancha?</div>
+          <label class="option-container">
+            <input type="radio" name="q5" value="1">
+            <span class="radio-dot"></span>
+            <span class="option-letter">A)</span>
+            ~300,000 km/s
+          </label>
+          <label class="option-container">
+            <input type="radio" name="q5" value="0">
+            <span class="radio-dot"></span>
+            <span class="option-letter">B)</span>
+            ~150,000 km/s
+          </label>
+        </div>
+
+        <input type="hidden" name="score"         id="scoreInput">
+        <input type="hidden" name="subject"       value="Physics">
+        <input type="hidden" name="level"         value="Hard">
+        <input type="hidden" name="time_spent"    id="timeSpentInput" value="0">
+        <input type="hidden" name="finish_reason" id="finishReasonInput" value="manual">
+
+        <div class="divider"></div>
+
+        <button type="submit" class="btn-finish">
+          ✈ &nbsp;Testni Yakunlash
+        </button>
+      </form>
+    </div>
+
+    <div id="resultScreen"></div>
+  </div>
+</div>
+
+<script>
+var TOTAL     = 120;
+var LS_START  = 'quiz_start_ts';
+var LS_ANS    = 'quiz_ans';
+var LS_WARNED = 'quiz_warned';
+var LS_ULD    = 'quiz_unloading';
+var LS_RESULT = 'quiz_result';
+var SS_ALIVE  = 'quiz_alive';
+
+var testFinished = false;
+var timerInt     = null;
+var startTs      = null;
+
+window.addEventListener('DOMContentLoaded', function () {
+  var savedResult = null;
+  try { savedResult = localStorage.getItem(LS_RESULT); } catch(e){}
+  if (savedResult) {
+    try {
+      var d = JSON.parse(savedResult);
+      testFinished = true;
+      showResultScreen(d.score, d.timeSpent, d.reason, d.answered);
+    } catch(e) { try { localStorage.removeItem(LS_RESULT); } catch(ex){} }
+    return;
+  }
+
+  var alive = null, savedTs = null, wasUnload = null;
+  try {
+    alive     = sessionStorage.getItem(SS_ALIVE);
+    savedTs   = localStorage.getItem(LS_START);
+    wasUnload = localStorage.getItem(LS_ULD);
+    localStorage.removeItem(LS_ULD);
+  } catch(e){}
+
+  var isRefresh = (alive === '1') && (savedTs !== null) && (wasUnload === '1');
+
+  if (isRefresh) {
+    startTs = parseInt(savedTs, 10);
+    restoreAnswers();
+    updateDisplay();
+    var warned = null;
+    try { warned = localStorage.getItem(LS_WARNED); } catch(e){}
+    if (warned === '1') {
+      finishTest('refresh');
+    } else {
+      try { localStorage.setItem(LS_WARNED, '1'); } catch(e){}
+      showWarnOverlay();
+      startTimer();
+      listenAnswers();
+    }
+  } else {
+    try { localStorage.removeItem(LS_ANS); localStorage.removeItem(LS_WARNED); } catch(e){}
+    startTs = Date.now();
+    try {
+      localStorage.setItem(LS_START, startTs);
+      sessionStorage.setItem(SS_ALIVE, '1');
+    } catch(e){}
+    updateDisplay();
+    startTimer();
+    listenAnswers();
+  }
+});
+
+function getRemaining() {
+  if (!startTs) return 0;
+  return Math.max(0, TOTAL - Math.floor((Date.now() - startTs) / 1000));
+}
+
+function startTimer() {
+  updateDisplay();
+  if (timerInt) clearInterval(timerInt);
+  timerInt = setInterval(function () {
+    if (testFinished) return;
+    updateDisplay();
+    if (getRemaining() <= 0) finishTest('timeout');
+  }, 500);
+}
+
+function updateDisplay() {
+  var rem = getRemaining();
+  var el  = document.getElementById('timer');
+  var min = Math.floor(rem / 60);
+  var sec = rem % 60;
+  el.textContent = (min < 10 ? '0'+min : min) + ':' + (sec < 10 ? '0'+sec : sec);
+  el.classList.toggle('danger', rem <= 15);
+}
+
+function saveAnswers() {
+  var ans = {};
+  for (var i = 1; i <= 5; i++) {
+    var el = document.querySelector('input[name="q'+i+'"]:checked');
+    if (el) ans['q'+i] = el.value;
+  }
+  try { localStorage.setItem(LS_ANS, JSON.stringify(ans)); } catch(e){}
+}
+
+function restoreAnswers() {
+  try {
+    var raw = localStorage.getItem(LS_ANS);
+    if (!raw) return;
+    var data = JSON.parse(raw);
+    Object.keys(data).forEach(function(k) {
+      var el = document.querySelector('input[name="'+k+'"][value="'+data[k]+'"]');
+      if (el) el.checked = true;
+    });
+  } catch(e){}
+}
+
+function listenAnswers() {
+  document.querySelectorAll('input[type="radio"]').forEach(function(r) {
+    r.addEventListener('change', saveAnswers);
+  });
+}
+
+function showWarnOverlay() {
+  var rem = getRemaining();
+  var min = Math.floor(rem / 60);
+  var sec = rem % 60;
+  var t   = (min < 10 ? '0'+min : min) + ':' + (sec < 10 ? '0'+sec : sec);
+  document.getElementById('warnText').innerHTML =
+    'Siz sahifani yangiladingiz.<br>' +
+    'Qolgan vaqt: <strong style="color:#06b6d4;font-family:\'Orbitron\',monospace">'+t+'</strong> — davom etmoqda.<br><br>' +
+    '<strong style="color:var(--danger)">⚠️ Bu so\'nggi ogohlantirish!</strong><br>' +
+    '<span style="color:var(--tsec)">Yana yangilasangiz test <strong style="color:var(--text)">avtomatik tugaydi</strong>.</span>';
+  document.getElementById('warnOverlay').classList.add('show');
+}
+
+document.getElementById('warnOkBtn').addEventListener('click', function () {
+  document.getElementById('warnOverlay').classList.remove('show');
+  document.getElementById('warnStrip').classList.add('show');
+});
+
+function calcScore() {
+  var s = 0;
+  for (var i = 1; i <= 5; i++) {
+    var el = document.querySelector('input[name="q'+i+'"]:checked');
+    if (el && el.value === '1') s++;
+  }
+  return s;
+}
+
+function countAnswered() {
+  var c = 0;
+  for (var i = 1; i <= 5; i++) {
+    if (document.querySelector('input[name="q'+i+'"]:checked')) c++;
+  }
+  return c;
+}
+
+function showResultScreen(score, timeSpent, reason, answered) {
+  if (answered === undefined) answered = countAnswered();
+  var pct  = Math.round((score / 5) * 100);
+  var mins = Math.floor(timeSpent / 60);
+  var secs = timeSpent % 60;
+  var ts   = (mins < 10 ? '0'+mins : mins) + ':' + (secs < 10 ? '0'+secs : secs);
+
+  var reasons = {
+    tab:     { cls: 'bad',  icon: '⊘', text: 'Tab almashtirildi — test avtomatik tugadi' },
+    timeout: { cls: 'bad',  icon: '⧗', text: 'Vaqt tugadi — test avtomatik yakunlandi'  },
+    manual:  { cls: 'good', icon: '✈', text: 'Test muvaffaqiyatli yakunlandi'            },
+    refresh: { cls: 'bad',  icon: '↺', text: 'Ikki marta yangilandi — test tugadi'       },
+  };
+  var r     = reasons[reason] || reasons.manual;
+  var emoji = score === 5 ? '🏆' : score >= 3 ? '👍' : '📚';
+  var title = score === 5 ? 'Mukammal natija!' : score >= 3 ? 'Yaxshi ish!' : 'Mashq qiling!';
+  var valCls = score < 2 ? ' bad' : '';
+
+  var qc = document.getElementById('quizContent');
+  if (qc) qc.style.display = 'none';
+  var qh = document.querySelector('.quiz-header');
+  if (qh) qh.style.display = 'none';
+
+  var rs = document.getElementById('resultScreen');
+  rs.style.display = 'block';
+  rs.innerHTML =
+    '<div class="score-circle">' +
+      '<div class="score-num">'+score+'/5</div>' +
+      '<div class="score-pct">'+pct+'%</div>' +
+    '</div>' +
+    '<div class="result-emoji">'+emoji+'</div>' +
+    '<div class="result-title">'+title+'</div>' +
+    '<span class="reason-badge '+r.cls+'">'+r.icon+' &nbsp;'+r.text+'</span>' +
+    '<div class="stats-grid">' +
+      '<div class="result-stat"><span class="rl">To\'g\'ri javoblar</span><span class="rv'+valCls+'">'+score+'/5</span></div>' +
+      '<div class="result-stat"><span class="rl">Javob berilgan</span><span class="rv">'+answered+'/5</span></div>' +
+      '<div class="result-stat"><span class="rl">Sarflangan vaqt</span><span class="rv">'+ts+'</span></div>' +
+      '<div class="result-stat"><span class="rl">Fan / Daraja</span><span class="rv">Physics · Hard</span></div>' +
+    '</div>' +
+    '<a href="'+HOME_URL+'" class="btn-home" onclick="try{localStorage.removeItem(\''+LS_RESULT+'\')}catch(e){}">⌂ &nbsp;Bosh sahifaga</a>';
+}
+
+function finishTest(reason) {
+  if (testFinished) return;
+  testFinished = true;
+  clearInterval(timerInt);
+  var score     = calcScore();
+  var timeSpent = Math.min(TOTAL, Math.floor((Date.now() - startTs) / 1000));
+  try {
+    localStorage.removeItem(LS_START);
+    localStorage.removeItem(LS_ANS);
+    localStorage.removeItem(LS_WARNED);
+    localStorage.removeItem(LS_ULD);
+    sessionStorage.removeItem(SS_ALIVE);
+  } catch(e){}
+
+  if (reason === 'manual') {
+    document.getElementById('scoreInput').value        = score;
+    document.getElementById('timeSpentInput').value    = timeSpent;
+    document.getElementById('finishReasonInput').value = 'manual';
+    try { localStorage.removeItem(LS_RESULT); } catch(e){}
+    document.getElementById('quizForm').submit();
+    return;
+  }
+  try {
+    localStorage.setItem(LS_RESULT, JSON.stringify({
+      score: score, timeSpent: timeSpent, reason: reason, answered: countAnswered()
+    }));
+  } catch(e){}
+  showResultScreen(score, timeSpent, reason);
+}
+
+document.addEventListener('visibilitychange', function () {
+  if (!document.hidden || testFinished) return;
+  setTimeout(function () {
+    var uld = null;
+    try { uld = localStorage.getItem(LS_ULD); } catch(e){}
+    if (uld === '1') return;
+    if (!testFinished) finishTest('tab');
+  }, 50);
+});
+
+window.addEventListener('beforeunload', function () {
+  if (testFinished) return;
+  try { localStorage.setItem(LS_ULD, '1'); } catch(e){}
+  saveAnswers();
+});
+
+document.getElementById('quizForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  for (var i = 1; i <= 5; i++) {
+    if (!document.querySelector('input[name="q'+i+'"]:checked')) {
+      showBanner('⚠️  Barcha savollarga javob bering!');
+      return;
+    }
+  }
+  finishTest('manual');
+});
+
+function showBanner(text) {
+  var b = document.getElementById('banner');
+  b.textContent = text;
+  b.style.display = 'block';
+  setTimeout(function () { b.style.display = 'none'; }, 3500);
+}
+</script>
+</body>
+</html>

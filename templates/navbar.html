@@ -1,0 +1,449 @@
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
+<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'>
+  <defs>
+    <linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'>
+      <stop offset='0%25' stop-color='%2300f2ff'/>
+      <stop offset='50%25' stop-color='%237000ff'/>
+      <stop offset='100%25' stop-color='%23ff00c8'/>
+    </linearGradient>
+    <filter id='f' x='-20%25' y='-20%25' width='140%25' height='140%25'>
+      <feGaussianBlur in='SourceAlpha' stdDeviation='3'/>
+      <feOffset dx='0' dy='4' result='offsetblur'/>
+      <feComponentTransfer>
+        <feFuncA type='linear' slope='0.5'/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in='SourceGraphic'/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width='128' height='128' rx='32' fill='%230f0f12'/>
+  <circle cx='64' cy='64' r='42' fill='url(%23g)' opacity='0.15'/>
+  <circle cx='64' cy='64' r='36' fill='url(%23g)' filter='url(%23f)'/>
+  <text x='50%25' y='52%25' font-size='42' fill='white' font-family='Segoe UI, Roboto, Helvetica, sans-serif'
+        text-anchor='middle' dominant-baseline='middle' font-weight='900'>M</text>
+</svg>">
+
+<nav class="navbar-custom">
+    <div class="nav-container">
+
+        <!-- LOGO -->
+        <a href="{% url 'home' %}" class="logo" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit;font-weight:bold;font-size:24px;">
+            <span class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="28" height="28">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.96 1.21m.99-5.64a8.112 8.112 0 0 0-3.322 1.954l-4.162 4.162a2.25 2.25 0 0 0 .142 3.326l.942.816a2.25 2.25 0 0 0 2.946-.11l4.162-4.162a8.112 8.112 0 0 0 1.954-3.322m0 0a8.112 8.112 0 0 1 3.322-1.954V6.75a.75.75 0 0 0-1.5 0v3.42a8.112 8.112 0 0 1-1.822 4.887l-4.16 4.16a2.25 2.25 0 0 1-3.181 0l-.943-.943a2.25 2.25 0 0 1 0-3.182l4.16-4.16a8.112 8.112 0 0 1 4.887-1.822h3.42a.75.75 0 0 0 0-1.5h-3.42Z" />
+                </svg>
+            </span>
+            EduTest
+        </a>
+
+        <!-- RIGHT -->
+        <div class="nav-right" id="mobileMenu">
+
+            <!-- ⚡ BILIM JANGI BUTTON -->
+            <a href="{% url 'subjects:bilimlar_janggi' %}" class="nav-link-btn btn-quiz">
+                ⚡ Bilim Jangi
+            </a>
+
+            <!-- 🤖 AI TEACHER BUTTON -->
+            <a href="{% url 'ai_teacher' %}" class="nav-link-btn btn-ai-teacher">
+                🤖 AI Teacher
+            </a>
+
+            {% if user.is_authenticated %}
+
+            <!-- USER -->
+            <div class="user-pill">
+                <span class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </span>
+                <div class="user-details">
+                    {% if user.role %}
+                    <span class="role">{{ user.role }}</span>
+                    {% endif %}
+                    <span class="username">{{ user.username }}</span>
+                </div>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="nav-actions">
+                <a href="{% url 'profile' %}" class="nav-link-btn btn-profile">Profile</a>
+                <form action="{% url 'logout' %}" method="POST" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-link-btn btn-logout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            </div>
+
+            {% else %}
+
+            <!-- AUTH -->
+            <div class="auth-btns">
+                <a href="{% url 'login' %}" class="nav-link-btn btn-login">Login</a>
+                <a href="{% url 'register' %}" class="nav-link-btn btn-register">Register</a>
+            </div>
+
+            {% endif %}
+
+            <!-- THEME SWITCH -->
+            <button id="themeToggle" class="theme-btn">
+                <i class="fas fa-moon"></i>
+            </button>
+
+            <!-- LANGUAGE -->
+            {% if request.GET.lang == 'en' %}
+            <a href="{% url 'home' %}" class="lang-switch">UZ</a>
+            {% else %}
+            <a href="{% url 'subjects:home_english' %}?lang=en" class="lang-switch">EN</a>
+            {% endif %}
+
+        </div>
+
+        <!-- MOBILE MENU -->
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+    </div>
+</nav>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<style>
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+    background: #0f172a;
+    color: white;
+    transition: 0.4s ease;
+}
+
+body.light-mode {
+    background: #f4f7fb;
+    color: #111827;
+}
+
+/* ========================= */
+/* NAVBAR */
+/* ========================= */
+
+.navbar-custom {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    background: rgba(10,10,12,0.8);
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    z-index: 2000;
+    transition: 0.4s ease;
+}
+
+body.light-mode .navbar-custom {
+    background: rgba(255,255,255,0.8);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.nav-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: auto;
+    padding: 0 40px;
+    display: flex;
+    justify-content: space-between; /* logo chapda, qolgani o'ngda */
+    align-items: center;
+}
+
+.logo {
+    text-decoration: none;
+    color: white;
+    font-size: 26px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: 0.3s;
+    flex-shrink: 0;
+}
+
+body.light-mode .logo { color: #111827; }
+
+.logo:hover { color: #00f2ff; }
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 15px;
+    flex-wrap: nowrap;
+}
+
+/* USER */
+.user-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 16px 6px 6px;
+    border-radius: 50px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: 0.4s;
+}
+
+body.light-mode .user-pill {
+    background: white;
+    border: 1px solid rgba(0,0,0,0.08);
+}
+
+.user-avatar { font-size: 28px; color: #00f2ff; }
+
+.user-details { display: flex; flex-direction: column; }
+
+.role {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #00f2ff;
+    font-weight: 700;
+}
+
+.username { font-size: 14px; font-weight: 600; color: white; }
+
+body.light-mode .username { color: #111827; }
+
+/* BUTTONS */
+.nav-actions,
+.auth-btns { display: flex; gap: 10px; }
+
+.nav-link-btn {
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+/* ⚡ QUIZ BUTTON */
+.btn-quiz {
+    background: linear-gradient(135deg, #00f2ff, #7000ff);
+    color: white !important;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 15px rgba(0,242,255,0.3);
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-quiz::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #7000ff, #ff00c8);
+    opacity: 0;
+    transition: 0.3s;
+}
+
+.btn-quiz:hover::before { opacity: 1; }
+
+.btn-quiz:hover {
+    transform: scale(1.06);
+    box-shadow: 0 0 25px rgba(112,0,255,0.6);
+    color: white;
+}
+
+.btn-quiz span { position: relative; z-index: 1; }
+
+/* 🤖 AI TEACHER BUTTON */
+.btn-ai-teacher {
+    background: rgba(255,255,255,0.05);
+    color: #00f2ff !important;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border: 1px solid #00f2ff;
+}
+
+body.light-mode .btn-ai-teacher {
+    background: rgba(0,242,255,0.08);
+    color: #0891b2 !important;
+    border: 1px solid #0891b2;
+}
+
+.btn-ai-teacher:hover {
+    background: #00f2ff;
+    color: black !important;
+    transform: scale(1.06);
+    box-shadow: 0 0 20px rgba(0,242,255,0.5);
+}
+
+/* PROFILE */
+.btn-profile {
+    background: rgba(255,255,255,0.05);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+body.light-mode .btn-profile {
+    background: white;
+    color: #111827;
+    border: 1px solid rgba(0,0,0,0.08);
+}
+
+/* LOGOUT */
+.btn-logout { background: #ff4b5c; color: white; }
+
+/* LOGIN */
+.btn-login { color: #00f2ff; }
+
+/* REGISTER */
+.btn-register { background: #00f2ff; color: black; }
+
+/* THEME */
+.theme-btn {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: 1px solid #00f2ff;
+    background: transparent;
+    color: #00f2ff;
+    cursor: pointer;
+    transition: 0.4s;
+    flex-shrink: 0;
+}
+
+.theme-btn:hover {
+    background: #00f2ff;
+    color: black;
+    transform: rotate(180deg);
+}
+
+/* LANGUAGE */
+.lang-switch {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border: 1px solid #00f2ff;
+    color: #00f2ff;
+    font-size: 13px;
+    font-weight: 800;
+    transition: 0.4s;
+    flex-shrink: 0;
+}
+
+.lang-switch:hover {
+    background: #00f2ff;
+    color: black;
+    transform: rotate(360deg);
+}
+
+/* MENU TOGGLE */
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+body.light-mode .menu-toggle { color: #111827; }
+
+/* ========================= */
+/* TABLET */
+/* ========================= */
+
+@media (max-width: 992px) {
+    .nav-container { padding: 0 20px; }
+    .logo { font-size: 22px; }
+}
+
+/* ========================= */
+/* MOBILE */
+/* ========================= */
+
+@media (max-width: 768px) {
+
+    .menu-toggle { display: block; }
+
+    .nav-right {
+        position: absolute;
+        top: 80px; left: 0;
+        width: 100%;
+        background: #0f172a;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px;
+        display: none;
+    }
+
+    body.light-mode .nav-right { background: white; }
+
+    .nav-right.active { display: flex; }
+
+    .nav-actions,
+    .auth-btns {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .nav-link-btn { width: 100%; text-align: center; justify-content: center; }
+
+    .btn-quiz,
+    .btn-ai-teacher { width: 100%; text-align: center; justify-content: center; }
+
+    .lang-switch,
+    .theme-btn {
+        width: 100%;
+        border-radius: 14px;
+        height: 45px;
+    }
+
+    .user-pill { width: 100%; }
+}
+
+</style>
+
+<script>
+
+/* MOBILE MENU */
+const menuToggle = document.getElementById("menuToggle");
+const mobileMenu = document.getElementById("mobileMenu");
+
+menuToggle.addEventListener("click", () => {
+    mobileMenu.classList.toggle("active");
+});
+
+/* THEME */
+const themeToggle = document.getElementById("themeToggle");
+const body = document.body;
+
+if (localStorage.getItem("theme") === "light") {
+    body.classList.add("light-mode");
+    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+}
+
+themeToggle.addEventListener("click", () => {
+    body.classList.toggle("light-mode");
+    if (body.classList.contains("light-mode")) {
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        localStorage.setItem("theme", "light");
+    } else {
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        localStorage.setItem("theme", "dark");
+    }
+});
+
+</script>

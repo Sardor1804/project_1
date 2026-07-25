@@ -1,0 +1,10 @@
+<h2>Uy ishlari</h2>
+
+{% for hw in homeworks %}
+<div style="padding:15px; background:#2f3f55; margin:10px; border-radius:10px;">
+    <h4>{{ hw.title }}</h4>
+    <a href="{% url 'subjects:homework_detail' hw.id %}" class="btn btn-primary">
+        Ochish
+    </a>
+</div>
+{% endfor %}

@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Google Fonts: Outfit -->
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --physics-cyan: #00d2ff;
+        --physics-blue: #3a7bd5;
+        --energy-yellow: #f1c40f;
+        --danger-red: #e74c3c;
+        --space-black: #050508;
+    }
+
+    .subject-page {
+        min-height: 100vh;
+        background: radial-gradient(circle at top, #0a1128 0%, var(--space-black) 100%);
+        font-family: 'Outfit', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 20px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .subject-page::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-image: radial-gradient(circle, #ffffff 1px, transparent 1px);
+        background-size: 100px 100px;
+        opacity: 0.05;
+        z-index: 0;
+    }
+
+    .header-section {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        margin-bottom: 70px;
+    }
+
+    .physics-title {
+        font-weight: 800;
+        font-size: clamp(3rem, 10vw, 5.5rem);
+        margin: 0;
+        background: linear-gradient(to bottom, #fff 30%, var(--physics-cyan));
+        -webkit-text-fill-color: transparent;
+        text-transform: uppercase;
+        letter-spacing: 15px;
+        filter: drop-shadow(0 0 20px rgba(0, 210, 255, 0.3));
+    }
+
+    .sub-text {
+        color: #64748b;
+        font-size: 1.2rem;
+        letter-spacing: 3px;
+        margin-top: 15px;
+        font-weight: 300;
+        text-transform: uppercase;
+    }
+
+    .cards-wrapper {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 35px;
+        width: 100%;
+        max-width: 1200px;
+    }
+
+    .level-card {
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(0, 210, 255, 0.08);
+        border-radius: 40px;
+        padding: 55px 40px;
+        text-align: center;
+        transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .level-card:hover {
+        transform: translateY(-15px);
+        background: rgba(0, 210, 255, 0.04);
+        border-color: var(--physics-cyan);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 210, 255, 0.1);
+    }
+
+    .icon-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+        color: var(--physics-cyan);
+        transition: 0.5s;
+    }
+
+    .level-card:hover .icon-wrapper {
+        transform: rotateY(180deg) scale(1.1);
+        filter: drop-shadow(0 0 15px var(--physics-cyan));
+    }
+
+    .level-card h3 {
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+        font-weight: 700;
+        color: #ffffff;
+    }
+
+    .level-card p {
+        color: #94a3b8;
+        line-height: 1.6;
+        font-size: 1rem;
+        font-weight: 300;
+        height: 50px;
+        margin-bottom: 40px;
+    }
+
+    .btn-action {
+        display: block;
+        padding: 18px;
+        border-radius: 20px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-decoration: none !important;
+        color: white !important;
+        transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .btn-easy { background: linear-gradient(135deg, #00b09b, #96c93d); }
+    .btn-normal { background: linear-gradient(135deg, var(--energy-yellow), #f39c12); color: #000 !important; }
+    .btn-hard { background: linear-gradient(135deg, var(--danger-red), #950101); }
+
+    .btn-action:hover {
+        transform: scale(1.05);
+        filter: brightness(1.15);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+</style>
+
+<div class="subject-page">
+    <div class="header-section">
+       <h2 style="text-align: center; font-size: 8ex;">Physics</h2>
+        <p class="sub-text">Secrets and laws of the universe</p>
+    </div>
+
+    <div class="cards-wrapper">
+
+        <!-- EASY -->
+        <div class="level-card">
+            <div class="icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="65" height="65">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+            </div>
+            <h3>Easy</h3>
+            <p>Basic mechanics and dynamics problems.</p>
+            <a href="{% url 'subjects:physics_easy_english' %}" class="btn-action btn-easy">Start</a>
+        </div>
+
+        <!-- MEDIUM -->
+        <div class="level-card">
+            <div class="icon-wrapper" style="color: var(--energy-yellow);">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="65" height="65">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
+                </svg>
+            </div>
+            <h3>Medium</h3>
+            <p>Electromagnetism and optics.</p>
+            <a href="{% url 'subjects:physics_normal_english' %}" class="btn-action btn-normal">Start</a>
+        </div>
+
+        <!-- HARD -->
+        <div class="level-card">
+            <div class="icon-wrapper" style="color: var(--danger-red);">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="65" height="65">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v1.244c0 .892-.567 1.686-1.416 1.954a18.973 18.973 0 0 0-5.715 3.111c-.719.519-1.02 1.441-.75 2.268a18.821 18.821 0 0 0 7.846 9.402c.744.444 1.691.334 2.302-.27l.883-.876c.611-.607 1.558-.717 2.302-.273a18.821 18.821 0 0 0 7.846 9.403c.827.27 1.749-.031 2.268-.751a18.973 18.973 0 0 0 3.111-5.714c.268-.849-.062-1.416-.954-1.416h-1.244" />
+                </svg>
+            </div>
+            <h3>Hard</h3>
+            <p>Quantum physics and relativity theory.</p>
+            <a href="{% url 'subjects:physics_hard_english' %}" class="btn-action btn-hard">Start</a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const cards = document.querySelectorAll(".level-card");
+        cards.forEach((card, i) => {
+            card.style.opacity = "0";
+            card.style.transform = "translateY(40px)";
+            setTimeout(() => {
+                card.style.transition = "all 0.8s cubic-bezier(0.23, 1, 0.32, 1)";
+                card.style.opacity = "1";
+                card.style.transform = "translateY(0)";
+            }, i * 150);
+        });
+    });
+</script>
+
+{% endblock %}

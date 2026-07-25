@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | MOCK</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
+    <svg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'>
+      <defs>
+        <linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'>
+          <stop offset='0%25' stop-color='%2300f2ff'/>
+          <stop offset='50%25' stop-color='%237000ff'/>
+          <stop offset='100%25' stop-color='%23ff00c8'/>
+        </linearGradient>
+        <filter id='f' x='-20%25' y='-20%25' width='140%25' height='140%25'>
+          <feGaussianBlur in='SourceAlpha' stdDeviation='3'/>
+          <feOffset dx='0' dy='4' result='offsetblur'/>
+          <feComponentTransfer><feFuncA type='linear' slope='0.5'/></feComponentTransfer>
+          <feMerge><feMergeNode/><feMergeNode in='SourceGraphic'/></feMerge>
+        </filter>
+      </defs>
+      <rect width='128' height='128' rx='32' fill='%230f0f12'/>
+      <circle cx='64' cy='64' r='42' fill='url(%23g)' opacity='0.15'/>
+      <circle cx='64' cy='64' r='36' fill='url(%23g)' filter='url(%23f)'/>
+      <text x='50%25' y='52%25' font-size='42' fill='white' font-family='Inter, sans-serif'
+            text-anchor='middle' dominant-baseline='middle' font-weight='900'>M</text>
+    </svg>">
+
+    <style>
+        /* ── Reset & Base ── */
+        *, *::before, *::after {
+            margin: 0; padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --accent:       #7c3aed;
+            --accent-light: #8b5cf6;
+            --accent-dim:   rgba(124, 58, 237, 0.18);
+            --accent-glow:  rgba(124, 58, 237, 0.35);
+            --bg:           #0d0d14;
+            --surface:      rgba(255,255,255,0.045);
+            --surface-hover:rgba(255,255,255,0.08);
+            --border:       rgba(255,255,255,0.10);
+            --border-focus: rgba(124,58,237,0.7);
+            --text-primary: #f0eeff;
+            --text-muted:   rgba(240,238,255,0.5);
+            --text-hint:    rgba(240,238,255,0.3);
+            --danger:       rgba(255, 85, 105, 0.85);
+            --success:      rgba(52, 211, 153, 0.9);
+            --radius-sm:    10px;
+            --radius-md:    14px;
+            --radius-lg:    22px;
+            --transition:   0.25s cubic-bezier(.4,0,.2,1);
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Animated background ── */
+        .bg-canvas {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.25;
+            animation: drift 14s ease-in-out infinite alternate;
+        }
+
+        .orb-1 {
+            width: 480px; height: 480px;
+            background: radial-gradient(circle, #7c3aed, transparent 70%);
+            top: -100px; left: -80px;
+            animation-duration: 16s;
+        }
+
+        .orb-2 {
+            width: 380px; height: 380px;
+            background: radial-gradient(circle, #2563eb, transparent 70%);
+            bottom: -80px; right: -60px;
+            animation-duration: 12s;
+            animation-delay: -4s;
+        }
+
+        .orb-3 {
+            width: 260px; height: 260px;
+            background: radial-gradient(circle, #db2777, transparent 70%);
+            top: 40%; left: 50%;
+            transform: translate(-50%, -50%);
+            animation-duration: 18s;
+            animation-delay: -8s;
+        }
+
+        @keyframes drift {
+            from { transform: translate(0, 0) scale(1); }
+            to   { transform: translate(40px, 30px) scale(1.08); }
+        }
+
+        /* grid dots overlay */
+        .bg-canvas::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 36px 36px;
+        }
+
+        /* ── Header ── */
+        header {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 48px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(13,13,20,0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-mark {
+            width: 34px; height: 34px;
+            border-radius: 9px;
+            background: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; font-weight: 700; color: #fff;
+            box-shadow: 0 0 18px var(--accent-glow);
+        }
+
+        .logo-text {
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            background: linear-gradient(90deg, #e0d7ff, #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .lang-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: var(--surface);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .lang-badge:hover {
+            background: var(--surface-hover);
+            color: var(--text-primary);
+            border-color: var(--border-focus);
+        }
+
+        /* ── Main ── */
+        main {
+            flex: 1;
+            position: relative;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px 48px;
+        }
+
+        /* ── Login Card ── */
+        .login-card {
+            width: 100%;
+            max-width: 430px;
+            background: rgba(255,255,255,0.045);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 42px 38px;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.06) inset,
+                0 32px 80px rgba(0,0,0,0.55);
+            animation: cardIn 0.55s cubic-bezier(.22,1,.36,1) both;
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(28px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .card-icon {
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            background: var(--accent-dim);
+            border: 1px solid rgba(124,58,237,0.3);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 22px;
+            animation: iconPop 0.6s 0.2s cubic-bezier(.22,1,.36,1) both;
+        }
+
+        @keyframes iconPop {
+            from { opacity: 0; transform: scale(0.6) rotate(-10deg); }
+            to   { opacity: 1; transform: scale(1) rotate(0); }
+        }
+
+        .card-header h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            letter-spacing: -0.3px;
+        }
+
+        .card-header p {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* ── Error Alert ── */
+        .alert-error {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,85,105,0.12);
+            border: 1px solid rgba(255,85,105,0.3);
+            color: #ff6b7d;
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13.5px;
+            margin-bottom: 22px;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%,100%{transform:translateX(0)}
+            20%{transform:translateX(-6px)}
+            40%{transform:translateX(6px)}
+            60%{transform:translateX(-4px)}
+            80%{transform:translateX(4px)}
+        }
+
+        /* ── Role Toggle ── */
+        .role-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 26px;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 5px;
+        }
+
+        .role-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 10px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .role-btn i { font-size: 17px; }
+
+        .role-btn:hover:not(.active) {
+            color: var(--text-primary);
+            background: var(--surface-hover);
+        }
+
+        .role-btn.active {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+
+        .role-btn.active i { color: #fff; }
+
+        /* ── Input Fields ── */
+        .field {
+            margin-bottom: 18px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 7px;
+            letter-spacing: 0.3px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 17px;
+            color: var(--text-hint);
+            pointer-events: none;
+            transition: color var(--transition);
+        }
+
+        .custom-input {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            padding: 12px 14px 12px 42px;
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+            caret-color: var(--accent-light);
+        }
+
+        .custom-input::placeholder {
+            color: var(--text-hint);
+        }
+
+        .custom-input:hover {
+            border-color: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.06);
+        }
+
+        .custom-input:focus {
+            border-color: var(--accent-light);
+            background: rgba(124,58,237,0.07);
+            box-shadow: 0 0 0 3px var(--accent-dim);
+        }
+
+        .custom-input:focus ~ .input-icon {
+            color: var(--accent-light);
+        }
+
+        /* Eye toggle */
+        .eye-toggle {
+            position: absolute;
+            right: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-hint);
+            cursor: pointer;
+            font-size: 17px;
+            padding: 4px;
+            border-radius: 6px;
+            transition: color var(--transition);
+            line-height: 1;
+        }
+
+        .eye-toggle:hover { color: var(--text-muted); }
+
+        /* ── Submit Button ── */
+        .btn-login {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: var(--accent);
+            color: #fff;
+            font-size: 14.5px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+            transition: var(--transition);
+            box-shadow: 0 4px 20px var(--accent-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+            pointer-events: none;
+        }
+
+        .btn-login:hover {
+            background: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px var(--accent-glow);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 12px var(--accent-glow);
+        }
+
+        .btn-login .spinner {
+            display: none;
+            width: 17px; height: 17px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .btn-login.loading .btn-text { display: none; }
+        .btn-login.loading .spinner  { display: block; }
+
+        /* ── Divider ── */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 22px 0;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .divider span {
+            font-size: 12px;
+            color: var(--text-hint);
+        }
+
+        /* ── Register Link ── */
+        .register-row {
+            text-align: center;
+            font-size: 13.5px;
+            color: var(--text-muted);
+        }
+
+        .register-row a {
+            color: var(--accent-light);
+            font-weight: 600;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .register-row a::after {
+            content: '';
+            position: absolute;
+            left: 0; bottom: -1px;
+            width: 0; height: 1px;
+            background: var(--accent-light);
+            transition: width var(--transition);
+        }
+
+        .register-row a:hover::after { width: 100%; }
+
+        /* ── Footer bar at bottom ── */
+        footer {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 12px;
+            font-size: 12px;
+            color: var(--text-hint);
+            border-top: 1px solid var(--border);
+        }
+
+        /* ── Input valid/invalid states ── */
+        .field.valid   .custom-input { border-color: rgba(52,211,153,0.5); }
+        .field.invalid .custom-input { border-color: rgba(255,85,105,0.5); }
+
+        .field-msg {
+            font-size: 11.5px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .field.valid   .field-msg { color: var(--success); display: block; }
+        .field.invalid .field-msg { color: var(--danger);  display: block; }
+
+        /* ── Strength bar ── */
+        .strength-bar {
+            height: 3px;
+            border-radius: 4px;
+            background: var(--border);
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0;
+            border-radius: 4px;
+            transition: width 0.4s ease, background 0.4s ease;
+        }
+
+        /* ── Tooltip ── */
+        .tooltip-wrap { position: relative; display: inline-block; }
+
+        .tooltip-wrap .tip {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20,15,40,0.95);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .tooltip-wrap:hover .tip {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Animated background -->
+    <div class="bg-canvas">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <a href="/" class="nav-logo">
+            <div class="logo-mark">M</div>
+            <span class="logo-text">MOCK</span>
+        </a>
+        <div class="tooltip-wrap">
+            <span class="lang-badge">
+                <i class="bi bi-globe2"></i> UZ
+                <i class="bi bi-chevron-down" style="font-size:11px; opacity:0.6"></i>
+            </span>
+            <span class="tip">Tilni o'zgartirish</span>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main>
+        <div class="login-card">
+
+            <!-- Card header -->
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="bi bi-shield-lock" id="cardIconEl"></i>
+                </div>
+                <h3 id="cardTitle">Tizimga kirish</h3>
+                <p id="cardSub">Hisobingizga xush kelibsiz</p>
+            </div>
+
+            <!-- Error (Django template tag) -->
+            {% if error %}
+            <div class="alert-error">
+                <i class="bi bi-exclamation-triangle-fill" style="font-size:15px; flex-shrink:0"></i>
+                Username yoki parol noto'g'ri
+            </div>
+            {% endif %}
+
+            <!-- Role selector -->
+            <div class="role-wrap">
+                <button type="button" id="btnStudent" class="role-btn active" onclick="selectRole('student')">
+                    <i class="bi bi-person-badge"></i> Student
+                </button>
+                <button type="button" id="btnTeacher" class="role-btn" onclick="selectRole('teacher')">
+                    <i class="bi bi-person-workspace"></i> Teacher
+                </button>
+            </div>
+
+            <!-- Form -->
+            <form method="POST" action="{% url 'login' %}" id="loginForm" novalidate>
+                {% csrf_token %}
+
+                <!-- Hidden role field -->
+                <input type="hidden" name="role" id="roleField" value="student">
+
+                <!-- Username -->
+                <div class="field" id="fieldUser">
+                    <label for="username_field">Username</label>
+                    <div class="input-wrap">
+                        <input
+                            type="text"
+                            id="username_field"
+                            name="username"
+                            class="custom-input"
+                            placeholder="username kiriting"
+                            autocomplete="username"
+                            required
+                        >
+                        <i class="bi bi-person input-icon"></i>
+                    </div>
+                    <div class="field-msg" id="userMsg"></div>
+                </div>
+
+                <!-- Password -->
+                <div class="field" id="fieldPass">
+                    <label for="password_field">
+                        Parol
+                    </label>
+                    <div class="input-wrap">
+                        <input
+                            type="password"
+                            id="password_field"
+                            name="password"
+                            class="custom-input"
+                            placeholder="parolni kiriting"
+                            autocomplete="current-password"
+                            required
+                            style="padding-right: 42px;"
+                        >
+                        <i class="bi bi-key input-icon"></i>
+                        <button type="button" class="eye-toggle" id="eyeBtn" onclick="togglePassword()" aria-label="Parolni ko'rsatish/yashirish">
+                            <i class="bi bi-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                    <div class="strength-bar" id="strengthBar" style="display:none">
+                        <div class="strength-fill" id="strengthFill"></div>
+                    </div>
+                    <div class="field-msg" id="passMsg"></div>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="btn-login" id="submitBtn">
+                    <span class="btn-text">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        Hisobga kirish
+                    </span>
+                    <span class="spinner"></span>
+                </button>
+            </form>
+
+            <div class="divider"><span>yoki</span></div>
+
+            <div class="register-row">
+                Profil yo'qmi?
+                <a href="{% url 'register' %}">Ro'yxatdan o'tish</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2025 MOCK Platform — Barcha huquqlar himoyalangan
+    </footer>
+
+    <script>
+        /* ─── Role selector ─── */
+        const roles = {
+            student: {
+                title: 'Tizimga kirish',
+                sub: 'Talaba sifatida kiring',
+                icon: 'bi-mortarboard',
+                lock: 'bi-shield-lock'
+            },
+            teacher: {
+                title: 'Tizimga kirish',
+                sub: 'O\'qituvchi sifatida kiring',
+                icon: 'bi-person-workspace',
+                lock: 'bi-shield-check'
+            }
+        };
+
+        function selectRole(role) {
+            const sBtn = document.getElementById('btnStudent');
+            const tBtn = document.getElementById('btnTeacher');
+            const iconEl = document.getElementById('cardIconEl');
+            const titleEl = document.getElementById('cardTitle');
+            const subEl = document.getElementById('cardSub');
+            const roleField = document.getElementById('roleField');
+
+            if (role === 'student') {
+                sBtn.classList.add('active');
+                tBtn.classList.remove('active');
+            } else {
+                tBtn.classList.add('active');
+                sBtn.classList.remove('active');
+            }
+
+            const data = roles[role];
+            iconEl.className = 'bi ' + data.lock;
+            subEl.textContent = data.sub;
+            roleField.value = role;
+
+            /* small bounce on icon */
+            iconEl.parentElement.style.transform = 'scale(0.85) rotate(-5deg)';
+            setTimeout(() => { iconEl.parentElement.style.transform = ''; }, 200);
+        }
+
+        /* ─── Password visibility ─── */
+        function togglePassword() {
+            const inp  = document.getElementById('password_field');
+            const icon = document.getElementById('eyeIcon');
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                inp.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        }
+
+        /* ─── Password strength ─── */
+        document.getElementById('password_field').addEventListener('input', function () {
+            const val = this.value;
+            const bar = document.getElementById('strengthBar');
+            const fill = document.getElementById('strengthFill');
+            const msg = document.getElementById('passMsg');
+
+            if (val.length === 0) {
+                bar.style.display = 'none';
+                document.getElementById('fieldPass').classList.remove('valid','invalid');
+                msg.textContent = '';
+                return;
+            }
+
+            bar.style.display = 'block';
+            let score = 0;
+            if (val.length >= 6)  score++;
+            if (val.length >= 10) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            const levels = [
+                { pct: '20%',  color: '#ef4444', label: 'Juda zaif' },
+                { pct: '40%',  color: '#f97316', label: 'Zaif' },
+                { pct: '60%',  color: '#eab308', label: 'O\'rtacha' },
+                { pct: '80%',  color: '#22c55e', label: 'Yaxshi' },
+                { pct: '100%', color: '#10b981', label: 'Kuchli' }
+            ];
+            const lvl = levels[Math.min(score - 1, 4)] || levels[0];
+            fill.style.width = lvl.pct;
+            fill.style.background = lvl.color;
+            msg.textContent = lvl.label;
+            msg.style.color  = lvl.color;
+            msg.style.display = 'block';
+            document.getElementById('fieldPass').classList.remove('valid','invalid');
+            document.getElementById('fieldPass').classList.add(score >= 3 ? 'valid' : 'invalid');
+        });
+
+        /* ─── Username validation ─── */
+        document.getElementById('username_field').addEventListener('blur', function () {
+            const fld = document.getElementById('fieldUser');
+            const msg = document.getElementById('userMsg');
+            if (this.value.trim().length < 3) {
+                fld.classList.remove('valid'); fld.classList.add('invalid');
+                msg.textContent = 'Kamida 3 ta belgi kiriting';
+            } else {
+                fld.classList.remove('invalid'); fld.classList.add('valid');
+                msg.textContent = 'Yaxshi!';
+            }
+        });
+
+        /* ─── Submit loading state ─── */
+        document.getElementById('loginForm').addEventListener('submit', function () {
+            const btn = document.getElementById('submitBtn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+        });
+
+        /* ─── Card icon transition ─── */
+        document.getElementById('cardIconEl').parentElement.style.transition =
+            'transform 0.2s cubic-bezier(.34,1.56,.64,1)';
+
+        /* ─── Ripple on submit button ─── */
+        document.getElementById('submitBtn').addEventListener('click', function (e) {
+            const r = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            r.style.cssText = `
+                position:absolute; width:${size}px; height:${size}px;
+                left:${e.clientX - rect.left - size/2}px;
+                top:${e.clientY - rect.top - size/2}px;
+                background:rgba(255,255,255,0.18); border-radius:50%;
+                transform:scale(0); pointer-events:none;
+                animation: ripple 0.6s linear;
+            `;
+            this.appendChild(r);
+            setTimeout(() => r.remove(), 650);
+        });
+
+        const rippleStyle = document.createElement('style');
+        rippleStyle.textContent = `@keyframes ripple { to { transform:scale(4); opacity:0; } }`;
+        document.head.appendChild(rippleStyle);
+    </script>
+
+</body>
+</html>
