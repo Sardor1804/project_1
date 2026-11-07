@@ -65,3 +65,65 @@ class Option(models.Model):
 
     def __str__(self):
         return self.text
+
+
+from django.conf import settings
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
+
+
+class Review(models.Model):
+    """Foydalanuvchilar tomonidan qoldirilgan otzivlar (fan + daraja bo'yicha)."""
+
+    DARAJA_CHOICES = [
+        ("oson", "Oson"),
+        ("ortacha", "O'rtacha"),
+        ("qiyin", "Qiyin"),
+    ]
+
+    TAVSIYA_CHOICES = [
+        ("ha", "Ha"),
+        ("balki", "Balki"),
+        ("yoq", "Yo'q"),
+    ]
+
+    fan = models.CharField("Fan nomi", max_length=100)
+    daraja = models.CharField("Daraja", max_length=20, choices=DARAJA_CHOICES)
+
+    ism = models.CharField("Ism", max_length=150)
+    lavozim = models.CharField("Lavozim / kompaniya", max_length=150, blank=True)
+
+    baho = models.PositiveSmallIntegerField(
+        "Baho", validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+
+    kuchli_tomonlar = models.TextField("Kuchli tomonlar", blank=True)
+    kamchiliklar = models.TextField("Kamchiliklar", blank=True)
+    izoh = models.TextField("Qo'shimcha fikr", blank=True)
+
+    tavsiya = models.CharField(
+        "Tavsiya qiladimi", max_length=10, choices=TAVSIYA_CHOICES, blank=True
+    )
+
+    foydalanuvchi = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="otzivlar",
+        verbose_name="Foydalanuvchi",
+    )
+
+    yaratilgan_vaqt = models.DateTimeField("Yaratilgan vaqt", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Otziv"
+        verbose_name_plural = "Otzivlar"
+        ordering = ["-yaratilgan_vaqt"]
+
+    def __str__(self):
+        return f"{self.ism} — {self.fan} ({self.get_daraja_display()}) {self.baho}/5"
+
+    @property
+    def yulduzlar(self) -> str:
+        return "⭐" * self.baho

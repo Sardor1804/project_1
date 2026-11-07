@@ -285,6 +285,7 @@
   .msg.ai{ align-self:flex-start; background:var(--paper); border:1px solid rgba(32,38,59,0.12); border-bottom-left-radius:4px; }
   .msg.ai b.name{ display:block; font-size:11px; color:var(--chalk-green); font-family:'IBM Plex Mono',monospace; margin-bottom:3px; }
   .msg.typing{ font-style:italic; color:var(--ink-soft); }
+  .msg.error{ align-self:flex-start; background:#FBEDEA; border:1px solid var(--margin-red); color:var(--margin-red); border-bottom-left-radius:4px; }
 
   .chat-input-row{
     display:flex; gap:10px; margin-top:14px;
@@ -357,7 +358,9 @@
   .transcript-box .who{ font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; margin-bottom:3px; }
   .transcript-box .who.you{ color:var(--margin-red); }
   .transcript-box .who.ai{ color:var(--chalk-green); }
+  .transcript-box .who.err{ color:var(--margin-red); }
   .transcript-box .text{ font-size:14.5px; line-height:1.55; }
+  .transcript-box .text.err{ color:var(--margin-red); }
   .transcript-box .placeholder{ color:var(--ink-soft); font-size:13.5px; font-style:italic; }
 
   .speak-controls{ display:flex; gap:10px; }
@@ -594,20 +597,43 @@
   render();
 
   // ---------------- Claude API helper ----------------
+  // This page is served by your own local backend (server.py), which is
+  // running at the SAME origin as this page (127.0.0.1:8000). The browser
+  // calls our own "/api/chat" endpoint - never api.anthropic.com directly -
+  // because a browser can never safely call the real Anthropic API (no
+  // CORS support, and it would expose your API key to anyone). server.py
+  // holds the real API key and forwards the request for us.
   async function askAI(systemPrompt, userText){
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({
-        model:'claude-sonnet-4-6',
-        max_tokens:1000,
-        system: systemPrompt,
-        messages:[{ role:'user', content:userText }]
-      })
-    });
-    const data = await res.json();
-    const block = (data.content || []).find(c=>c.type==='text');
-    return block ? block.text : "Kechirasiz, javob olishda xatolik yuz berdi.";
+    let res;
+    try{
+      res = await fetch('/api/chat', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({
+          system: systemPrompt,
+          message: userText
+        })
+      });
+    }catch(networkErr){
+      throw new Error('NETWORK: ' + networkErr.message + ' \u2014 server.py ishga tushirilganini tekshiring');
+    }
+
+    let data;
+    try{
+      data = await res.json();
+    }catch(parseErr){
+      throw new Error('PARSE: server javobi JSON emas (status ' + res.status + ')');
+    }
+
+    if(!res.ok){
+      const apiMsg = (data && data.error) ? data.error : ('HTTP ' + res.status);
+      throw new Error('API: ' + apiMsg);
+    }
+
+    if(!data.reply){
+      throw new Error('EMPTY: AI javob matni topilmadi');
+    }
+    return data.reply;
   }
 
   // ---------------- CHAT VIEW ----------------
@@ -618,7 +644,7 @@
   function addMsg(role, text){
     const div = document.createElement('div');
     div.className = 'msg ' + role;
-    if(role==='ai'){
+    if(role==='ai' || role==='ai typing'){
       div.innerHTML = '<b class="name">AI TEACHER</b>' + text;
     } else {
       div.textContent = text;
@@ -630,8 +656,11 @@
 
   const CHAT_SYSTEM = "Sen 'AI Teacher' — o'quvchi Sardor uchun mehribon, ilhomlantiruvchi shaxsiy o'qituvchisan. U hozircha Ingliz tili, Matematika va Informatika fanlarini o'rganmoqda va matematikada kasrlar mavzusida qiynalmoqda. Faqat o'zbek tilida, qisqa, aniq va do'stona tushuntir. Kerak bo'lsa misollar keltir.";
 
+  let chatBusy = false;
+
   async function sendChat(text){
-    if(!text.trim()) return;
+    if(!text.trim() || chatBusy) return;
+    chatBusy = true;
     addMsg('user', text);
     chatInput.value = '';
     chatSend.disabled = true;
@@ -641,10 +670,12 @@
       typing.remove();
       addMsg('ai', reply.replace(/\n/g,'<br>'));
     }catch(e){
+      console.error('AI Teacher chat error:', e);
       typing.remove();
-      addMsg('ai', "Kechirasiz, ulanishda xatolik yuz berdi. Qaytadan urinib ko'ring.");
+      addMsg('error', "Kechirasiz, javob olishda xatolik yuz berdi: " + e.message);
     }
     chatSend.disabled = false;
+    chatBusy = false;
   }
 
   chatSend.addEventListener('click', ()=> sendChat(chatInput.value));
@@ -687,12 +718,13 @@
       if(ph) ph.remove();
     }
 
-    function addLine(who, text){
+    function addLine(who, text, isError){
       setPlaceholderGone();
       const wrap = document.createElement('div');
       wrap.className = 'line';
-      const label = who==='you' ? 'SIZ' : 'AI TEACHER';
-      wrap.innerHTML = '<div class="who '+who+'">'+label+'</div><div class="text"></div>';
+      const label = who==='you' ? 'SIZ' : (isError ? 'XATOLIK' : 'AI TEACHER');
+      const whoClass = who==='you' ? 'you' : (isError ? 'err' : 'ai');
+      wrap.innerHTML = '<div class="who '+whoClass+'">'+label+'</div><div class="text' + (isError?' err':'') + '"></div>';
       wrap.querySelector('.text').textContent = text;
       transcriptBox.appendChild(wrap);
       transcriptBox.scrollTop = transcriptBox.scrollHeight;
@@ -727,7 +759,7 @@
     recognition.addEventListener('error', (e)=>{
       listening = false;
       micBtn.classList.remove('listening');
-      micStatus.textContent = "Xatolik: mikrofonga ruxsat berilganini tekshiring";
+      micStatus.textContent = "Xatolik: mikrofonga ruxsat berilganini tekshiring (" + e.error + ")";
     });
 
     recognition.addEventListener('result', async (e)=>{
@@ -741,7 +773,8 @@
         speak(reply);
         micStatus.textContent = "Gapirish uchun mikrofonni bosing";
       }catch(err){
-        addLine('ai', "Sorry, connection error. Please try again.");
+        console.error('AI Teacher speaking error:', err);
+        addLine('ai', "Sorry, connection error: " + err.message, true);
         micStatus.textContent = "Gapirish uchun mikrofonni bosing";
       }
     });

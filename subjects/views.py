@@ -228,3 +228,109 @@ from django.contrib.auth.decorators import login_required
 @login_required
 def ai_teacher(request):
     return render(request, "ai_teacher.html")
+
+
+@login_required
+def ai_teacher_english(request):
+    return render(request, "ai_teacher.html")
+
+
+from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
+from django.shortcuts import redirect, render
+
+from .models import Review
+
+
+def otziv_view(request):
+    """otziv.html sahifasini ko'rsatadi va yuborilgan formani saqlaydi.
+
+    Sahifa quyidagi query parametrlarni kutadi (informatika.html'dagi
+    "Otziv qoldirish" tugmalaridan keladi):
+        ?fan=Informatika&daraja=oson
+    """
+    fan = request.GET.get("fan", "")
+    daraja = request.GET.get("daraja", "")
+
+    if request.method == "POST":
+        fan = request.POST.get("fan", fan).strip() or "Umumiy"
+        daraja = request.POST.get("daraja", daraja).strip() or "oson"
+
+        ism = request.POST.get("ism", "").strip()
+        lavozim = request.POST.get("lavozim", "").strip()
+        baho_raw = request.POST.get("baho")
+        kuchli_tomonlar = request.POST.get("kuchli_tomonlar", "").strip()
+        kamchiliklar = request.POST.get("kamchiliklar", "").strip()
+        izoh = request.POST.get("izoh", "").strip()
+        tavsiya = request.POST.get("tavsiya", "").strip()
+
+        errors = []
+        if not ism:
+            errors.append("Ismingizni kiriting.")
+
+        baho = None
+        try:
+            baho = int(baho_raw)
+            if not (1 <= baho <= 5):
+                raise ValueError
+        except (TypeError, ValueError):
+            errors.append("Iltimos, 1 dan 5 gacha baho tanlang.")
+
+        if errors:
+            for err in errors:
+                messages.error(request, err)
+            return render(
+                request,
+                "otzivlar/otziv.html",
+                {
+                    "fan": fan,
+                    "daraja": daraja,
+                    "form_data": request.POST,
+                },
+            )
+
+        Review.objects.create(
+            fan=fan,
+            daraja=daraja,
+            ism=ism,
+            lavozim=lavozim,
+            baho=baho,
+            kuchli_tomonlar=kuchli_tomonlar,
+            kamchiliklar=kamchiliklar,
+            izoh=izoh,
+            tavsiya=tavsiya,
+            foydalanuvchi=request.user if request.user.is_authenticated else None,
+        )
+
+        messages.success(request, "✓ Rahmat! Sharhingiz qabul qilindi.")
+        return redirect(f"{request.path}?fan={fan}&daraja={daraja}&yuborildi=1")
+
+    return render(request, "otzivlar/otziv.html", {"fan": fan, "daraja": daraja})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def otzivlar_royxati(request):
+    """Faqat xodim/admin (is_staff) ko'ra oladigan barcha otzivlar ro'yxati."""
+    otzivlar = Review.objects.all()
+
+    fan = request.GET.get("fan")
+    daraja = request.GET.get("daraja")
+    if fan:
+        otzivlar = otzivlar.filter(fan__iexact=fan)
+    if daraja:
+        otzivlar = otzivlar.filter(daraja=daraja)
+
+    jami = otzivlar.count()
+    ortacha_baho = 0
+    if jami:
+        ortacha_baho = sum(o.baho for o in otzivlar) / jami
+
+    return render(
+        request,
+        "otzivlar/royxat.html",
+        {
+            "otzivlar": otzivlar,
+            "jami": jami,
+            "ortacha_baho": round(ortacha_baho, 1),
+        },
+    )

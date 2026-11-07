@@ -1,224 +1,506 @@
 {% extends "base.html" %}
 {% block content %}
 
-<!-- Google Fonts: Outfit -->
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
-    :root {
-        --accent-purple: #7000ff;
-        --accent-cyan: #00f2ff;
-        --accent-green: #00ff95;
-        --accent-yellow: #ffcc00;
-        --accent-red: #ff0055;
-        --bg-dark: #0a0a0f;
-        --card-bg: rgba(255, 255, 255, 0.03);
+    .otziv-page{
+        --ink:#0f1b1e;
+        --panel:#16262a;
+        --panel-2:#1c2f33;
+        --paper:#f4ede0;
+        --paper-dim:#c9c0ac;
+        --gold:#e8a33d;
+        --gold-dim:#c98a2e;
+        --plus:#7fb87a;
+        --minus:#d97b6c;
+        --line: rgba(244,237,224,0.14);
+
+        background:
+            radial-gradient(1200px 600px at 15% -10%, #1a2d31 0%, transparent 60%),
+            radial-gradient(1000px 700px at 100% 110%, #17282b 0%, transparent 55%),
+            var(--ink);
+        color:var(--paper);
+        font-family:'Inter', sans-serif;
+        min-height:100vh;
+        display:flex;
+        align-items:flex-start;
+        justify-content:center;
+        padding:56px 20px 100px;
     }
 
-    .subject-page {
-        min-height: 100vh;
-        background: var(--bg-dark);
-        font-family: 'Outfit', sans-serif;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 80px 20px;
-        color: white;
-        position: relative;
-        overflow: hidden;
+    .otziv-page *{ box-sizing:border-box; }
+
+    .otziv-wrap{ width:100%; max-width:620px; }
+
+    .otziv-eyebrow{
+        font-family:'JetBrains Mono', monospace;
+        font-size:12px;
+        letter-spacing:0.18em;
+        text-transform:uppercase;
+        color:var(--gold);
+        display:flex;
+        align-items:center;
+        gap:10px;
+        margin-bottom:18px;
+    }
+    .otziv-eyebrow::before{
+        content:"";
+        width:22px;height:1px;background:var(--gold-dim);display:inline-block;
     }
 
-    /* Grid Background Effect */
-    .subject-page::before {
-        content: '';
-        position: absolute;
-        width: 200%;
-        height: 200%;
-        background-image: 
-            linear-gradient(rgba(112, 0, 255, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(112, 0, 255, 0.05) 1px, transparent 1px);
-        background-size: 50px 50px;
-        transform: perspective(500px) rotateX(60deg);
-        top: -50%;
-        z-index: 0;
+    .otziv-page h1{
+        font-family:'Fraunces', serif;
+        font-weight:600;
+        font-style:italic;
+        font-size:clamp(32px, 5vw, 44px);
+        line-height:1.08;
+        margin:0 0 12px;
+        letter-spacing:-0.01em;
+        color:var(--paper);
+    }
+    .otziv-page h1 em{ color:var(--gold); font-style:normal; }
+
+    .otziv-lede{
+        color:var(--paper-dim);
+        font-size:15px;
+        line-height:1.6;
+        max-width:46ch;
+        margin:0 0 32px;
     }
 
-    .header-section {
-        position: relative;
-        z-index: 2;
-        text-align: center;
-        margin-bottom: 80px;
+    /* --- django messages --- */
+    .django-messages{ margin-bottom:24px; }
+    .django-message{
+        font-family:'JetBrains Mono', monospace;
+        font-size:13px;
+        padding:12px 16px;
+        border-radius:3px;
+        margin-bottom:8px;
+        border:1px solid var(--line);
+    }
+    .django-message.success{ color:var(--plus); border-color:rgba(127,184,122,0.35); background:rgba(127,184,122,0.08); }
+    .django-message.error{ color:var(--minus); border-color:rgba(217,123,108,0.35); background:rgba(217,123,108,0.08); }
+
+    /* ---- receipt card ---- */
+    .receipt{
+        position:relative;
+        background:var(--panel);
+        border-radius:2px;
+        padding:44px 40px 40px;
+        box-shadow:0 40px 80px -30px rgba(0,0,0,0.6), 0 0 0 1px rgba(244,237,224,0.05);
+    }
+    .receipt::before, .receipt::after{
+        content:"";
+        position:absolute;
+        left:0; right:0;
+        height:16px;
+        background:
+            radial-gradient(circle at 12px 50%, transparent 8px, var(--ink) 8.5px) repeat-x;
+        background-size: 24px 16px;
+    }
+    .receipt::before{ top:-8px; }
+    .receipt::after{ bottom:-8px; transform:scaleY(-1); }
+
+    .stub-row{
+        display:flex; justify-content:space-between; align-items:baseline;
+        font-family:'JetBrains Mono', monospace;
+        font-size:11px;
+        color:var(--paper-dim);
+        letter-spacing:0.04em;
+        padding-bottom:20px;
+        margin-bottom:28px;
+        border-bottom:1px dashed var(--line);
     }
 
-    .info-title {
-        font-weight: 800;
-        font-size: clamp(2.5rem, 8vw, 5rem);
-        margin: 0;
-        background: linear-gradient(to bottom, #fff, var(--accent-purple));
-        
-        -webkit-text-fill-color: transparent;
-        text-transform: uppercase;
-        letter-spacing: 12px;
-        filter: drop-shadow(0 0 15px rgba(112, 0, 255, 0.4));
+    .otziv-page fieldset{ border:none; margin:0; padding:0; }
+
+    .field-label{
+        display:block;
+        font-size:13px;
+        font-weight:600;
+        color:var(--paper);
+        margin-bottom:8px;
+    }
+    .field-sub{
+        display:block;
+        font-size:12px;
+        color:var(--paper-dim);
+        font-weight:400;
+        margin-top:2px;
     }
 
-    .sub-text {
-        color: #64748b;
-        font-size: 1.1rem;
-        letter-spacing: 4px;
-        margin-top: 15px;
-        font-weight: 300;
-        text-transform: uppercase;
+    .otziv-section{ margin-bottom:30px; }
+
+    /* --- star rating --- */
+    .rating-block{
+        text-align:center;
+        padding:8px 0 26px;
+        margin-bottom:30px;
+        border-bottom:1px dashed var(--line);
+    }
+    .rating-label{
+        font-family:'JetBrains Mono', monospace;
+        font-size:11px;
+        letter-spacing:0.14em;
+        text-transform:uppercase;
+        color:var(--paper-dim);
+        margin-bottom:16px;
+    }
+    .stars{
+        display:flex;
+        justify-content:center;
+        gap:10px;
+        margin-bottom:12px;
+    }
+    .star{
+        width:40px; height:40px;
+        cursor:pointer;
+        color: rgba(244,237,224,0.18);
+        transition: transform .15s ease, color .15s ease;
+    }
+    .star:hover{ transform: translateY(-3px) scale(1.08); }
+    .star svg{ width:100%; height:100%; display:block; }
+    .star.active{ color: var(--gold); filter: drop-shadow(0 4px 10px rgba(232,163,61,0.35)); }
+
+    .rating-caption{
+        font-family:'Fraunces', serif;
+        font-style:italic;
+        font-size:16px;
+        color:var(--gold);
+        height:22px;
     }
 
-    .cards-wrapper {
-        position: relative;
-        z-index: 2;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 30px;
-        width: 100%;
-        max-width: 1100px;
+    /* --- inputs --- */
+    .otziv-page input[type=text], .otziv-page input[type=email], .otziv-page textarea{
+        width:100%;
+        background:var(--panel-2);
+        border:1px solid var(--line);
+        border-radius:3px;
+        color:var(--paper);
+        font-family:'Inter', sans-serif;
+        font-size:14px;
+        padding:12px 14px;
+        outline:none;
+        transition:border-color .15s ease, background .15s ease;
+        resize:vertical;
+    }
+    .otziv-page input::placeholder, .otziv-page textarea::placeholder{ color:#5c6f72; }
+    .otziv-page input:focus, .otziv-page textarea:focus{
+        border-color:var(--gold-dim);
+        background:#20363a;
+    }
+    .otziv-page input:focus-visible, .otziv-page textarea:focus-visible,
+    .star:focus-visible, .toggle:focus-visible, .otziv-page button:focus-visible{
+        outline:2px solid var(--gold);
+        outline-offset:2px;
     }
 
-    .level-card {
-        background: var(--card-bg);
-        backdrop-filter: blur(25px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 35px;
-        padding: 50px 40px;
-        text-align: center;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    .grid-2{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:16px;
     }
 
-    .level-card:hover {
-        transform: translateY(-12px);
-        background: rgba(255, 255, 255, 0.06);
-        border-color: rgba(112, 0, 255, 0.3);
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    /* --- pros/cons ledger --- */
+    .ledger{
+        display:grid;
+        grid-template-columns:1fr 1px 1fr;
+        gap:20px;
+        margin-bottom:8px;
+    }
+    .ledger-divider{ background:var(--line); }
+    .ledger-col .field-label{
+        display:flex; align-items:center; gap:8px;
+    }
+    .tag{
+        width:18px;height:18px;border-radius:50%;
+        display:inline-flex;align-items:center;justify-content:center;
+        font-size:12px; font-weight:700; flex:none;
+        font-family:'JetBrains Mono', monospace;
+    }
+    .tag.plus{ background:rgba(127,184,122,0.15); color:var(--plus); }
+    .tag.minus{ background:rgba(217,123,108,0.15); color:var(--minus); }
+    .ledger textarea{ min-height:96px; }
+    .ledger-col.plus textarea:focus{ border-color:var(--plus); }
+    .ledger-col.minus textarea:focus{ border-color:var(--minus); }
+
+    /* --- recommend toggle --- */
+    .toggle-row{
+        display:flex; align-items:center; justify-content:space-between;
+        gap:16px;
+        background:var(--panel-2);
+        border:1px solid var(--line);
+        border-radius:3px;
+        padding:14px 16px;
+    }
+    .toggle-row .field-label{ margin:0; }
+    .toggle-group{ display:flex; gap:8px; }
+    .toggle{
+        font-family:'JetBrains Mono', monospace;
+        font-size:12px;
+        letter-spacing:0.04em;
+        padding:8px 16px;
+        border-radius:3px;
+        border:1px solid var(--line);
+        background:transparent;
+        color:var(--paper-dim);
+        cursor:pointer;
+        transition:all .15s ease;
+    }
+    .toggle:hover{ border-color:var(--gold-dim); color:var(--paper); }
+    .toggle.selected{
+        background:var(--gold);
+        border-color:var(--gold);
+        color:#1a1206;
+        font-weight:600;
     }
 
-    .icon-wrapper {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 25px;
-        transition: 0.4s;
+    /* --- submit --- */
+    .submit-row{
+        margin-top:34px;
+        padding-top:22px;
+        border-top:1px dashed var(--line);
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:16px;
+        flex-wrap:wrap;
+    }
+    .total-line{
+        font-family:'JetBrains Mono', monospace;
+        font-size:11px;
+        color:var(--paper-dim);
+        letter-spacing:0.04em;
+    }
+    .total-line span{ color:var(--gold); }
+
+    .otziv-page button.submit{
+        font-family:'Inter', sans-serif;
+        font-size:14px;
+        font-weight:600;
+        color:#1a1206;
+        background:var(--gold);
+        border:none;
+        padding:14px 26px;
+        border-radius:3px;
+        cursor:pointer;
+        transition:transform .12s ease, background .15s ease, box-shadow .15s ease;
+        box-shadow:0 10px 24px -8px rgba(232,163,61,0.5);
+    }
+    .otziv-page button.submit:hover{ background:#f0ae4d; transform:translateY(-1px); }
+    .otziv-page button.submit:active{ transform:translateY(0px); }
+    .otziv-page button.submit:disabled{ opacity:0.6; cursor:not-allowed; transform:none; }
+
+    .field-hint-error{
+        font-family:'JetBrains Mono', monospace;
+        font-size:11px;
+        color:var(--minus);
+        margin-top:6px;
+        display:none;
+    }
+    .field-hint-error.show{ display:block; }
+
+    @media (max-width: 520px){
+        .receipt{ padding:34px 22px 30px; }
+        .grid-2, .ledger{ grid-template-columns:1fr; }
+        .ledger-divider{ display:none; }
+        .star{ width:32px; height:32px; }
+        .toggle-row{ flex-direction:column; align-items:flex-start; }
     }
 
-    .level-card:hover .icon-wrapper {
-        transform: scale(1.15);
-        filter: drop-shadow(0 0 15px currentColor);
+    @media (prefers-reduced-motion: reduce){
+        .otziv-page *{ transition:none !important; }
     }
-
-    .level-card h3 {
-        font-size: 1.8rem;
-        margin-bottom: 15px;
-        font-weight: 700;
-        letter-spacing: 1px;
-    }
-
-    .level-card p {
-        color: #94a3b8;
-        line-height: 1.6;
-        font-size: 1rem;
-        font-weight: 300;
-        height: 50px;
-        margin-bottom: 35px;
-    }
-
-    .btn-action {
-        display: block;
-        padding: 16px;
-        border-radius: 18px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        text-decoration: none !important;
-        color: white !important;
-        transition: 0.3s;
-        border: none;
-    }
-
-    /* Informatikaga xos gradientlar */
-    .btn-easy { background: linear-gradient(135deg, var(--accent-green), #00d2ff); }
-    .btn-normal { background: linear-gradient(135deg, var(--accent-yellow), #ff9500); color: #000 !important; }
-    .btn-hard { background: linear-gradient(135deg, var(--accent-purple), var(--accent-red)); }
-
-    .btn-action:hover {
-        transform: scale(1.03);
-        filter: brightness(1.1);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-    }
-
-    .icon-easy { color: var(--accent-green); }
-    .icon-normal { color: var(--accent-yellow); }
-    .icon-hard { color: var(--accent-purple); }
 </style>
-    
-    
-<div class="subject-page">
-    <div class="header-section">
-        <h2 style="text-align: center; font-size: 8ex;">Informatika</h2>
-        <p class="sub-text">Algoritmlar va texnologiyalar olami</p>
+
+<div class="otziv-page">
+<div class="otziv-wrap">
+    <div class="otziv-eyebrow">Mijoz fikri</div>
+    <h1>{{ fan|default:"Fan"|capfirst }} — <em>{% if daraja == "oson" %}Oson{% elif daraja == "ortacha" %}O'rtacha{% elif daraja == "qiyin" %}Qiyin{% else %}umumiy{% endif %}</em> daraja</h1>
+    <p class="otziv-lede">Ushbu mavzu bo'yicha tajribangiz bizga muhim. Ikki daqiqa vaqt ajrating — halol va aniq baho bering.</p>
+
+    {% if messages %}
+    <div class="django-messages">
+        {% for message in messages %}
+            <div class="django-message {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
+        {% endfor %}
     </div>
+    {% endif %}
 
-    <div class="cards-wrapper">
-        <!-- OSON -->
-        <div class="level-card">
-            <div class="icon-wrapper icon-easy">
-                <!-- Heroicons: computer-desktop -->
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="60">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
-                </svg>
-            </div>
-            <h3>Oson</h3>
-            <p>IT asoslari va kompyuter savodxonligi.</p>
-            <a href="{% url 'subjects:informatics_easy' %}" class="btn-action btn-easy">Boshlash</a>
+    <form class="receipt" id="reviewForm" method="post" action="{% url 'otzivlar:otziv' %}">
+        {% csrf_token %}
+        <input type="hidden" name="fan" value="{{ fan }}">
+        <input type="hidden" name="daraja" value="{{ daraja }}">
+        <input type="hidden" name="baho" id="bahoInput" value="{{ form_data.baho|default:'' }}">
+        <input type="hidden" name="tavsiya" id="tavsiyaInput" value="{{ form_data.tavsiya|default:'' }}">
+
+        <div class="stub-row">
+            <span>SHARH №{{ fan|slice:":3"|upper }}-{{ daraja|slice:":2"|upper }}</span>
+            <span id="dateStamp">--.--.----</span>
         </div>
 
-        <!-- O'RTACHA -->
-        <div class="level-card">
-            <div class="icon-wrapper icon-normal">
-                <!-- Heroicons: cpu-chip -->
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="60">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5m-15 7.5H3m18 0h-1.5m-15-10.5a2.25 2.25 0 012.25-2.25h9a2.25 2.25 0 012.25 2.25v10.5A2.25 2.25 0 0118 18.75h-9a2.25 2.25 0 01-2.25-2.25V5.25Zm.75 0v10.5c0 .414.336.75.75.75h9a.75.75 0 00.75-.75V5.25a.75.75 0 00-.75-.75h-9a.75.75 0 00-.75.75ZM9.75 6.75h4.5a.75.75 0 01.75.75v4.5a.75.75 0 01-.75.75h-4.5a.75.75 0 01-.75-.75v-4.5a.75.75 0 01.75-.75Z" />
-                </svg>
+        <div class="rating-block">
+            <div class="rating-label">Umumiy baho</div>
+            <div class="stars" id="starRow" role="radiogroup" aria-label="Umumiy baho, 5 balllik tizim">
+                <span class="star" data-value="1" tabindex="0" role="radio" aria-checked="false" aria-label="1 yulduz">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                </span>
+                <span class="star" data-value="2" tabindex="0" role="radio" aria-checked="false" aria-label="2 yulduz">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                </span>
+                <span class="star" data-value="3" tabindex="0" role="radio" aria-checked="false" aria-label="3 yulduz">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                </span>
+                <span class="star" data-value="4" tabindex="0" role="radio" aria-checked="false" aria-label="4 yulduz">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                </span>
+                <span class="star" data-value="5" tabindex="0" role="radio" aria-checked="false" aria-label="5 yulduz">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                </span>
             </div>
-            <h3>O'rtacha</h3>
-            <p>Algoritmlar va mantiqiy darvozalar.</p>
-            <a href="{% url 'subjects:informatics_normal' %}" class="btn-action btn-normal">Boshlash</a>
+            <div class="rating-caption" id="ratingCaption"></div>
         </div>
 
-        <!-- QIYIN -->
-        <div class="level-card">
-            <div class="icon-wrapper icon-hard">
-                <!-- Heroicons: code-bracket-square -->
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="60">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
-                </svg>
+        <div class="otziv-section grid-2">
+            <div>
+                <label class="field-label" for="ism">Ismingiz</label>
+                <input type="text" id="ism" name="ism" placeholder="Aziza Karimova" value="{{ form_data.ism|default:'' }}" required>
             </div>
-            <h3>Qiyin</h3>
-            <p>Dasturlash va kiberxavfsizlik asoslari.</p>
-            <a href="{% url 'subjects:informatics_hard' %}" class="btn-action btn-hard">Boshlash</a>
+            <div>
+                <label class="field-label" for="lavozim">Lavozim / kompaniya
+                    <span class="field-sub">(ixtiyoriy)</span>
+                </label>
+                <input type="text" id="lavozim" name="lavozim" placeholder="O'quvchi, 9-sinf" value="{{ form_data.lavozim|default:'' }}">
+            </div>
         </div>
-    </div>
+
+        <div class="otziv-section ledger">
+            <div class="ledger-col plus">
+                <label class="field-label" for="kuchli_tomonlar"><span class="tag plus">+</span> Kuchli tomonlar</label>
+                <textarea id="kuchli_tomonlar" name="kuchli_tomonlar" placeholder="Nima yoqdi? Masalan: tushunarli izoh, qiziqarli savollar...">{{ form_data.kuchli_tomonlar|default:'' }}</textarea>
+            </div>
+            <div class="ledger-divider"></div>
+            <div class="ledger-col minus">
+                <label class="field-label" for="kamchiliklar"><span class="tag minus">−</span> Kamchiliklar</label>
+                <textarea id="kamchiliklar" name="kamchiliklar" placeholder="Nimani yaxshilash kerak?">{{ form_data.kamchiliklar|default:'' }}</textarea>
+            </div>
+        </div>
+
+        <div class="otziv-section">
+            <label class="field-label" for="izoh">Qo'shimcha fikringiz
+                <span class="field-sub">Umumiy taassurotingizni batafsil yozing</span>
+            </label>
+            <textarea id="izoh" name="izoh" style="min-height:90px" placeholder="Testdan umumiy taassurotingiz...">{{ form_data.izoh|default:'' }}</textarea>
+        </div>
+
+        <div class="otziv-section">
+            <div class="toggle-row">
+                <label class="field-label">Do'stlaringizga tavsiya qilasizmi?</label>
+                <div class="toggle-group" id="recommendGroup">
+                    <button type="button" class="toggle" data-value="ha">Ha</button>
+                    <button type="button" class="toggle" data-value="balki">Balki</button>
+                    <button type="button" class="toggle" data-value="yoq">Yo'q</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="submit-row">
+            <div class="total-line">BAHO: <span id="ratingEcho">— / 5</span></div>
+            <button type="submit" class="submit">Sharhni yuborish</button>
+        </div>
+
+        <div class="field-hint-error" id="clientError"></div>
+    </form>
+</div>
 </div>
 
 <script>
-    // Kirish animatsiyasi
-    document.addEventListener("DOMContentLoaded", () => {
-        const cards = document.querySelectorAll(".level-card");
-        cards.forEach((card, index) => {
-            card.style.opacity = "0";
-            card.style.transform = "translateY(30px)";
-            setTimeout(() => {
-                card.style.transition = "all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
-                card.style.opacity = "1";
-                card.style.transform = "translateY(0)";
-            }, index * 150);
+(function(){
+    const d = new Date();
+    const stamp = document.getElementById('dateStamp');
+    if(stamp){
+        stamp.textContent =
+            String(d.getDate()).padStart(2,'0') + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + d.getFullYear();
+    }
+
+    const stars = document.querySelectorAll('.star');
+    const caption = document.getElementById('ratingCaption');
+    const echo = document.getElementById('ratingEcho');
+    const bahoInput = document.getElementById('bahoInput');
+    const captions = {1:'Juda yomon', 2:'Yomon', 3:'O\u2018rtacha', 4:'Yaxshi', 5:'Ajoyib'};
+
+    let rating = parseInt(bahoInput.value, 10) || 0;
+
+    function paint(value){
+        stars.forEach(s => {
+            const v = +s.dataset.value;
+            s.classList.toggle('active', v <= value);
+            s.setAttribute('aria-checked', v === rating ? 'true' : 'false');
+        });
+    }
+
+    if(rating > 0){
+        paint(rating);
+        caption.textContent = captions[rating] || '';
+        echo.textContent = rating + ' / 5';
+    }
+
+    stars.forEach(s => {
+        s.addEventListener('mouseenter', () => paint(+s.dataset.value));
+        s.addEventListener('mouseleave', () => paint(rating));
+        s.addEventListener('click', () => {
+            rating = +s.dataset.value;
+            bahoInput.value = rating;
+            paint(rating);
+            caption.textContent = captions[rating];
+            echo.textContent = rating + ' / 5';
+        });
+        s.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter' || e.key === ' '){
+                e.preventDefault();
+                rating = +s.dataset.value;
+                bahoInput.value = rating;
+                paint(rating);
+                caption.textContent = captions[rating];
+                echo.textContent = rating + ' / 5';
+            }
         });
     });
+
+    const tavsiyaInput = document.getElementById('tavsiyaInput');
+    const toggles = document.querySelectorAll('#recommendGroup .toggle');
+    toggles.forEach(btn => {
+        if(btn.dataset.value === tavsiyaInput.value){
+            btn.classList.add('selected');
+        }
+        btn.addEventListener('click', () => {
+            toggles.forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            tavsiyaInput.value = btn.dataset.value;
+        });
+    });
+
+    const form = document.getElementById('reviewForm');
+    const clientError = document.getElementById('clientError');
+    form.addEventListener('submit', (e) => {
+        if(rating === 0){
+            e.preventDefault();
+            clientError.textContent = '\u26a0 Iltimos, baho tanlang.';
+            clientError.classList.add('show');
+            return;
+        }
+        const ismVal = document.getElementById('ism').value.trim();
+        if(!ismVal){
+            e.preventDefault();
+            document.getElementById('ism').focus();
+            clientError.textContent = '\u26a0 Ismingizni kiriting.';
+            clientError.classList.add('show');
+            return;
+        }
+        clientError.classList.remove('show');
+    });
+})();
 </script>
 
 {% endblock %}
